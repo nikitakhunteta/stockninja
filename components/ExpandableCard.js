@@ -9,14 +9,15 @@ import {
     UIManager,
     TouchableOpacity,
     Platform,
+    useColorScheme
 } from 'react-native';
+import { Theme } from './../theme';
 
-const ExpandableComponent = ({ item, onClickFunction }) => {
-
-    console.log("item", item)
+const ExpandableComponent = ({ item, onClickFunction, HeaderComponent, ExpandedBodyComponent }) => {
+    const colorTheme = useColorScheme();
+    const theme = Theme[colorTheme];
     //Custom Component for the Expandable List
     const [layoutHeight, setLayoutHeight] = useState(0);
-
     useEffect(() => {
         if (item.isExpanded) {
             setLayoutHeight(null);
@@ -27,46 +28,34 @@ const ExpandableComponent = ({ item, onClickFunction }) => {
 
     return (
 
-        <View style={{ borderStyle: 'solid', borderWidth: 1, borderColor: '#0066ff' }}>
+        <View style={{
+            margin: 10,
+            borderRadius: 5,
+            borderStyle: 'solid', borderWidth: 1,
+            borderColor: theme.borderColorDark
+        }}>
             {/*Header of the Expandable List Item*/}
             <TouchableOpacity
-                activeOpacity={0.8}
+                activeOpacity={1}
                 onPress={onClickFunction}
-                style={styles.header}>
-                <Text style={styles.headerText}>{item.name}</Text>
-                <View style={[{ backgroundColor: '#3399ff', flexDirection: 'row' }]} >
-                    <Text style={[styles.content,{backgroundColor: '#3399ff', padding:0}]}>Total Slots</Text>
-                    <Text style={[styles.content, {
-                        flexGrow: 1,
-                        backgroundColor: '#3399ff',
-                        textAlign: 'right', padding:0
-                    }]}>{item.totalSlots}</Text>
-                </View>
+                style={styles(theme).header}>
+                <HeaderComponent item={item} />
             </TouchableOpacity>
             <View
                 style={{
                     height: layoutHeight,
                     overflow: 'hidden',
                 }}>
-
-               
-                <View style={[{ backgroundColor: '#3399ff', flexDirection: 'row' }]} >
-                    <Text style={styles.content}>Entry Fee</Text>
-                    <Text style={[styles.content, {
-                        flexGrow: 1,
-                        textAlign: 'right'
-                    }]}>Rs.{item.entryFee}</Text>
-
-                </View>
-
+                <ExpandedBodyComponent item={item} />
             </View>
         </View>
 
     );
 };
 
-const ExpandableCard = ({ data }) => {
-    // console.log("data",data)
+const ExpandableCard = ({ data, HeaderComponent, ExpandedBodyComponent, dataKeyExtractor }) => {
+    const colorTheme = useColorScheme();
+    const theme = Theme[colorTheme];
     const [listDataSource, setListDataSource] = useState([]);
     const [multiSelect, setMultiSelect] = useState(true);
 
@@ -76,14 +65,16 @@ const ExpandableCard = ({ data }) => {
     useEffect(() => {
         let updatedData = data;
         if (updatedData && updatedData.length > 0) {
-            updatedData = data.map(v => ({ ...v._data, isExpanded: false }))
+            if (dataKeyExtractor) {
+                updatedData = data.map(v => ({ ...v[dataKeyExtractor], isExpanded: false }))
+            } else {
+                updatedData = data.map(v => ({ ...v, isExpanded: false }))
+            }
         }
-        console.log("updatedData", updatedData)
         setListDataSource(updatedData)
 
-    }, [data])
+    }, [data]);
     const updateLayout = (index) => {
-        console.log("ccalled")
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         const array = [...listDataSource];
         if (multiSelect) {
@@ -99,20 +90,23 @@ const ExpandableCard = ({ data }) => {
         }
         setListDataSource(array);
     };
-
     return (
         <SafeAreaView style={{ width: '98%', flex: 1 }}>
-            <View style={styles.container}>
+            <View style={styles(theme).container}>
                 <ScrollView>
-                    {listDataSource?.map((item, key) => (
-                        <ExpandableComponent
-                            key={item.name}
-                            onClickFunction={() => {
-                                updateLayout(key);
-                            }}
-                            item={item}
-                        />
-                    ))}
+                    {listDataSource?.map((item, key) => {
+                        return (
+                            <ExpandableComponent
+                                key={item.name}
+                                onClickFunction={() => {
+                                    updateLayout(key);
+                                }}
+                                item={item}
+                                ExpandedBodyComponent={ExpandedBodyComponent}
+                                HeaderComponent={HeaderComponent}
+                            />
+                        )
+                    })}
                 </ScrollView>
             </View>
         </SafeAreaView>
@@ -120,26 +114,12 @@ const ExpandableCard = ({ data }) => {
 };
 
 export default ExpandableCard;
-const styles = StyleSheet.create({
+const styles = (themeColor) => StyleSheet.create({
     container: {
         flex: 1,
     },
-    titleText: {
-        flex: 1,
-        fontSize: 22,
-        fontWeight: 'bold',
-    },
     header: {
-        backgroundColor: '#3399ff',
         padding: 10,
-    },
-    headerText: {
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    content: {
-        paddingLeft: 10,
-        paddingRight: 10,
-        backgroundColor: '#fff',
-    },
+        backgroundColor: themeColor.backgroundColor
+    }
 });

@@ -1,121 +1,21 @@
-// /**
-//  * Sample React Native App
-//  * https://github.com/facebook/react-native
-//  *
-//  * @format
-//  */
-
-// import React, { useState } from 'react';
-// import auth from '@react-native-firebase/auth';
-// import PhoneNumber from './screens/PhoneNumber';
-
-// import {
-//   SafeAreaView,
-//   ScrollView,
-//   StatusBar,
-//   StyleSheet,
-//   Text,
-//   useColorScheme,
-//   View,
-// } from 'react-native';
-
-// import {
-//   Colors
-// } from 'react-native/Libraries/NewAppScreen';
-
-
-
-// function App() {
-//   const isDarkMode = useColorScheme() === 'dark';
-
-//   const backgroundStyle = {
-//     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-//   };
-
-//   const [confirm, setConfirm] = useState(null);
-//   const [authenticated, setAuthenticated] = useState(false);
-
-//   async function signIn(phoneNumber) {
-//     try {
-//       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-//       setConfirm(confirmation);
-//     } catch (error) {
-//       // alert(error);
-//     }
-//   }
-
-//   async function confirmVerificationCode(code) {
-//     try {
-//       await confirm.confirm(code);
-//       setConfirm(null);
-//     } catch (error) {
-//       // alert('Invalid code');
-//     }
-//   }
-
-//   // auth().onAuthStateChanged((user) => {
-//   //   if(user) {
-//   //     setAuthenticated(true);
-//   //   } else {
-//   //     setAuthenticated(false);
-//   //   }
-//   // })
-
-//   // if (authenticated) return <Authenticated />;
-
-//   if (confirm) return <VerifyCode onSubmit={confirmVerificationCode} />;
-
-
-//   return (
-//     <SafeAreaView style={backgroundStyle}>
-//       <StatusBar
-//         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-//         backgroundColor={backgroundStyle.backgroundColor}
-//       />
-//       <ScrollView
-//         contentInsetAdjustmentBehavior="automatic"
-//         style={backgroundStyle}>
-//         {/* <Header /> */}
-//         <View
-//           style={{
-//             backgroundColor: isDarkMode ? Colors.black : Colors.white,
-//           }}>
-//           <PhoneNumber onSubmit={signIn} />
-//         </View>
-//       </ScrollView>
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   sectionContainer: {
-//     marginTop: 32,
-//     paddingHorizontal: 24,
-//   },
-//   sectionTitle: {
-//     fontSize: 24,
-//     fontWeight: '600',
-//   },
-//   sectionDescription: {
-//     marginTop: 8,
-//     fontSize: 18,
-//     fontWeight: '400',
-//   },
-//   highlight: {
-//     fontWeight: '700',
-//   },
-// });
-
-// export default App;
 import React, { useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import PhoneNumber from './screens/PhoneNumber';
 import VerifyCode from './screens/VerifyCode';
+import Portfolio from './screens/Portfolio';
+import BuildPortfolio from './screens/BuildPortfolio';
+import PlaceOrder from './screens/PlaceOrder';
+
 import Authenticated from './screens/Authenticated';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [confirm, setConfirm] = useState(null);
   const [authenticated, setAuthenticated] = useState(false);
+  const [uid, setUid] = useState();
 
   async function signIn(phoneNumber) {
     try {
@@ -135,17 +35,29 @@ export default function App() {
     }
   }
 
-  auth().onAuthStateChanged((user) => {
-    if(user) {
+  auth().onAuthStateChanged((user, auth) => {
+    if (user) {
       setAuthenticated(true);
+      setUid(user.uid);
     } else {
       setAuthenticated(false);
     }
   })
 
-  if (authenticated) return <Authenticated />;
 
-  if (confirm) return <VerifyCode onSubmit={confirmVerificationCode} />;
+  return (<NavigationContainer>
 
-  return <PhoneNumber onSubmit={signIn} />;
+    {authenticated ? <Stack.Navigator>
+      <Stack.Screen
+        name="Home"
+        component={Authenticated}
+        options={{ title: 'Welcome' }}
+      />
+      <Stack.Screen name="Portfolio" component={Portfolio} initialParams={{uid}} />
+      <Stack.Screen name="BuildPortfolio" component={BuildPortfolio} initialParams={{uid}}/>
+      <Stack.Screen name="PlaceOrder" component={PlaceOrder} initialParams={{uid}}/>
+    </Stack.Navigator> :
+      (confirm ? <VerifyCode onSubmit={confirmVerificationCode} /> :
+        <PhoneNumber onSubmit={signIn} />)}
+  </NavigationContainer>);
 }
