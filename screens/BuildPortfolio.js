@@ -12,7 +12,7 @@ import ExpandableCard from './../components/ExpandableCard';
 
 
 export default BuildPortfolio = ({ navigation, route }) => {
-    const { name, portfolioId, uid, ...rest } = route.params;
+    const { name, leagueId, leagueJoinedId, portfolioId, uid, ...rest } = route.params;
     const colorTheme = useColorScheme();
     const theme = Theme[colorTheme];
     const [loading, setLoading] = useState(false);
@@ -25,25 +25,26 @@ export default BuildPortfolio = ({ navigation, route }) => {
 
     useEffect(() => {
         setLoading(true);
-        async function getData() {
+        async function getStocksData() {
             const topStocks = await firestore().collection('top-10-stocks').get();
             setMasterStocks(topStocks?._docs);
             setError(null);
             setLoading(false);
             setMasterStocksData(topStocks?._docs)
         }
-        getData();
+        getStocksData();
     }, []);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
-            async function getData() {
+            async function getOrdersData() {
+                //need to get by leagues joined id 
                 const portfolioStocks = await firestore().collection('orders')
                     .where('userId', '==', uid).where('portfolioId', '==', portfolioId)
                     .get();
                 setPortfolioStocks(portfolioStocks?._docs);
             }
-            getData();
+            getOrdersData();
         });
         return unsubscribe;
     }, [navigation]);

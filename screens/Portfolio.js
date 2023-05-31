@@ -7,7 +7,8 @@ import { TOTAL_PORTFOLIO_ALLOWED } from './../constants';
 import { CheckBox } from 'react-native-elements';
 
 export default Portfolio = ({ navigation, route }) => {
-    const { uid, leagueId } = route.params;
+    
+    const { uid, leagueId, leagueJoinedId, portfolioId } = route.params;
     const [portfolios, setPortfolios] = useState([]);
     const [addPortfolio, setAddPortfolio] = useState(false);
     const [portfolioName, onChangePortfolioName] = useState();
@@ -47,29 +48,48 @@ export default Portfolio = ({ navigation, route }) => {
     };
     const savePortfolio = async () => {
         setAddPortfolio(false);
-
         try {
             const documentRef = await firestore().collection('portfolios').add({
                 name: portfolioName,
                 stocksAllowed: 30,
                 userId: uid
+            });
+            navigation.navigate('BuildPortfolio', {
+                name: portfolioName,
+                portfolioId: documentRef._documentPath._parts[1],
+                leagueId,
+                leagueJoinedId
             })
-            navigation.navigate('BuildPortfolio', { name: portfolioName, portfolioId: documentRef._documentPath._parts[1] })
         } catch (err) {
             console.log('err', err)
         }
     }
 
     const getPortfolioDetails = (name, portfolioId) => {
-        navigation.navigate('BuildPortfolio', { name, portfolioId });
+        navigation.navigate('BuildPortfolio', { name, portfolioId, leagueJoinedId, leagueId });
     }
-    const joinLeague = () => {
+    const joinLeague = async () => {
         // select portfolio id, send to league page 
         // activate the league for the user
         // redirect to home pg
-        // console.log('returning to Home', leagueId,checked)
-        navigation.navigate('Home', { leagueId: leagueId, portfolioId: checked })
+        // console.log('returning to Home', leagueId,checked);
 
+        const leagueJoinedDoc = await firestore().collection('leaguesJoined').add({
+            leagueId,
+            userId: uid,
+            portfolioId: checked,
+            rank: null
+        });
+        // console.log('leagueJoinedDoc', leagueJoinedDoc)
+        navigation.navigate({
+            name: 'Home',
+            params: {
+                leagueId: leagueId,
+                portfolioId: checked,
+                leagueJoinedId: leagueJoinedDoc?._documentPath._parts[1]
+            },
+            merge: true,
+        })
     }
     const Item = ({ item }) => {
         return (
@@ -90,14 +110,14 @@ export default Portfolio = ({ navigation, route }) => {
                         checked={checked === item?._ref?._documentPath?._parts[1]}
                         onPress={() => setChecked(item?._ref?._documentPath?._parts[1])}
                     />
-                    <Text>{item._data.name} {item.isSelected.toString()}</Text></View>
+                    <Text>{item._data.name} {item?._ref?._documentPath?._parts[1]} {item.isSelected.toString()}</Text></View>
             </TouchableOpacity>
         )
     };
 
     return <View style={[styles.screen, {
         width: '100%'
-    }]} ><Text>Portfolios</Text>
+    }]} ><Text>Portfolios leagueId {leagueId} - leagueJoinedId {leagueJoinedId}</Text>
 
         {loading && <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <ActivityIndicator />

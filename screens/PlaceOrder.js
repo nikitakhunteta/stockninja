@@ -30,7 +30,10 @@ export default PlaceOrder = ({ route, navigation }) => {
                 portfolioId
 
             })
-            navigation.navigate('BuildPortfolio', { portfolioId })
+            navigation.goBack();
+            // navigation.navigate('BuildPortfolio', { portfolioId })
+            // params: { post: postText },
+            
         } catch (err) {
             console.log('err', err);
             Alert.alert(err);

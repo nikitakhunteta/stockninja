@@ -5,7 +5,7 @@ import VerifyCode from './screens/VerifyCode';
 import Portfolio from './screens/Portfolio';
 import BuildPortfolio from './screens/BuildPortfolio';
 import PlaceOrder from './screens/PlaceOrder';
-import ContestParticipate from './screens/ContestParticipate';
+import ContestParticipate from './screens/ViewContestPortfolio';
 import Authenticated from './screens/Authenticated';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -43,20 +43,18 @@ export default function App() {
       setAuthenticated(false);
     }
   })
-
-
-  return (<NavigationContainer>
-
-    {authenticated ? <Stack.Navigator>
+  return (
+  <NavigationContainer>
+    {uid && authenticated ? <Stack.Navigator>
       <Stack.Screen
         name="Home"
         component={Authenticated}
-        initialParams={{uid}}
+        initialParams={{ uid }}
       />
-      <Stack.Screen name="Portfolio" component={Portfolio} initialParams={{uid}} />
-      <Stack.Screen name="BuildPortfolio" component={BuildPortfolio} initialParams={{uid}}/>
-      <Stack.Screen name="PlaceOrder" component={PlaceOrder} initialParams={{uid}}/>
-      <Stack.Screen name="ContestParticipate" component={ContestParticipate} initialParams={{uid}}/>
+      <Stack.Screen name="Portfolio" component={Portfolio} initialParams={{ uid }} />
+      <Stack.Screen name="BuildPortfolio" component={BuildPortfolio} initialParams={{ uid }} />
+      <Stack.Screen name="PlaceOrder" component={PlaceOrder} initialParams={{ uid }} />
+      <Stack.Screen name="ViewContestPortfolio" component={ViewContestPortfolio} initialParams={{ uid }} />
 
     </Stack.Navigator> :
       (confirm ? <VerifyCode onSubmit={confirmVerificationCode} /> :

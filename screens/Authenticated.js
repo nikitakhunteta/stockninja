@@ -13,6 +13,7 @@ import { Theme } from './../theme';
 
 export default function Authenticated({ navigation, route }) {
   const { leagueId, portfolioId, uid } = route.params;
+
   const [leagues, setLeagues] = useState([]);
   const colorTheme = useColorScheme();
   const theme = Theme[colorTheme];
@@ -29,33 +30,53 @@ export default function Authenticated({ navigation, route }) {
   useEffect(() => {
     setLoading(true);
     let currentDate = new Date();
-    // console.log('uid', uid)
     try {
       async function getData() {
         const leagues = await firestore().collection('leagues').get();
+        const leaguesJoined = await firestore().collection('leaguesJoined').where('userId', '==', uid).get();
+        let leagueDocMapping = {};
+
+        let leaguesJoinedIds = leaguesJoined?._docs?.map(x => {
+          leagueDocMapping[x._data.leagueId] = {
+            leagueJoinedId: x._ref._documentPath._parts[1],
+            portfolioId: x._data.portfolioId,
+          }
+          return x._data.leagueId
+        });
+
         let data = leagues?._docs.map(v => {
-          return ({ _data: { ...v._data, hasStarted: dateInPast(v?._data?.startDateTime, currentDate), leagueId: v._ref._documentPath._parts[1] } })
-        })
+          let leagueId = v._ref._documentPath._parts[1];
+          return ({
+            ...v._data,
+            hasStarted: dateInPast(v?._data?.startDateTime, currentDate),
+            leagueId,
+            hasUserJoined: leaguesJoinedIds?.includes(leagueId),
+            leagueJoinedId: leagueDocMapping[leagueId]?.leagueJoinedId,
+            portfolioId: leagueDocMapping[leagueId]?.portfolioId,
+          })
+        });
         setLeagues(data);
         setLoading(false);
       }
       getData()
+
+      // join this with leagues participated 
+
     } catch (e) {
       setLoading(false);
     }
-  }, []);
+  }, [route.params?.leagueJoinedId]);
 
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      // console.log('focus on home screen', uid)
-    });
-    return unsubscribe;
-  }, [navigation]);
+  // useEffect(() => {
+  //   const unsubscribe = navigation.addListener('focus', () => {
+  //     console.log('focus on home screen', uid)
+  //   });
+  //   return unsubscribe;
+  // }, [navigation]);
 
   const HeaderComponent = ({ item }) => {
     return <View>
-      <Text style={styles.headerText}>{item._data.name}</Text>
+      <Text style={styles.headerText}>{item.name}</Text>
       <View style={[{
         backgroundColor: theme.backgroundColor,
         flexDirection: 'row', TouchableOpacity
@@ -66,13 +87,20 @@ export default function Authenticated({ navigation, route }) {
           flexGrow: 1,
           backgroundColor: theme.backgroundColor,
           textAlign: 'right'
-        }]}>{item._data.totalSlots}</Text>
+        }]}>{item.totalSlots}</Text>
       </View></View>
   }
   const participateInContest = (item) => {
-    navigation.navigate('Portfolio', { leagueId: item._data.leagueId })
+    navigation.navigate('Portfolio', { leagueId: item.leagueId, leagueJoinedId: item.leagueJoinedId })
     // call lock seat api 
     // select the portfolio to be used 
+  }
+  const viewContestPortfolio = (item) => {
+    navigation.navigate('ViewContestPortfolio', {
+      leagueId: item.leagueId,
+      leagueJoinedId: item.leagueJoinedId, 
+      portfolioId: item.portfolioId
+    })
   }
   const ExpandedBodyComponent = ({ item }) => {
 
@@ -82,20 +110,30 @@ export default function Authenticated({ navigation, route }) {
         <Text style={[{
           flexGrow: 1,
           textAlign: 'right'
-        }]}>Rs.{item._data.entryFee}</Text>
+        }]}>Rs.{item.entryFee}</Text>
       </View>
       <View style={[{ flexDirection: 'row' }]} >
         <Text >Starts In</Text>
         <Text style={[{
           flexGrow: 1,
           textAlign: 'right'
-        }]}> <Timer targetDate={item._data.startDateTime?.seconds * 1000}></Timer></Text>
+        }]}>
+          <Timer targetDate={item.startDateTime?.seconds * 1000}></Timer>
+        </Text>
 
 
       </View>
-      <View>
-        <Button title="Participate" disabled={item.hasStarted} onPress={() => participateInContest(item)} />
-      </View>
+      {!item.hasUserJoined &&
+
+        <View>
+          <Button title="Participate" disabled={item.hasStarted} onPress={() => participateInContest(item)} />
+        </View>
+      }
+      {item.hasUserJoined &&
+        <View>
+          <Button title="View" onPress={() => viewContestPortfolio(item)} />
+        </View>
+      }
     </View>
   }
   if (loading) {
@@ -110,7 +148,7 @@ export default function Authenticated({ navigation, route }) {
     <View style={styles.screen}>
       <Text style={styles.text}>You're Logged in</Text>
       <Text style={styles.phoneNumber}>{auth().currentUser.displayName + ' ' + auth().currentUser.phoneNumber}</Text>
-      <ExpandableCard data={leagues} dataKeyExtractor='_data'
+      <ExpandableCard data={leagues}
         HeaderComponent={HeaderComponent}
         ExpandedBodyComponent={ExpandedBodyComponent}>
       </ExpandableCard>
