@@ -66,7 +66,7 @@ const ExpandableCard = ({ data, HeaderComponent, ExpandedBodyComponent, dataKeyE
         let updatedData = data;
         if (updatedData && updatedData.length > 0) {
             if (dataKeyExtractor) {
-                updatedData = data.map(v => ({ ...v[dataKeyExtractor], isExpanded: false }))
+                updatedData = data.map(v => ({ ...v, isExpanded: false }))
             } else {
                 updatedData = data.map(v => ({ ...v, isExpanded: false }))
             }
@@ -97,7 +97,7 @@ const ExpandableCard = ({ data, HeaderComponent, ExpandedBodyComponent, dataKeyE
                     {listDataSource?.map((item, key) => {
                         return (
                             <ExpandableComponent
-                                key={item.name}
+                                key={key}
                                 onClickFunction={() => {
                                     updateLayout(key);
                                 }}

@@ -59,13 +59,14 @@ export default BuildPortfolio = ({ navigation, route }) => {
                 flexDirection: 'column', TouchableOpacity
             }]} >
                 <Text style={[styles.content,
-                { backgroundColor: theme.backgroundColor }]}>{item.name}</Text>
+                { backgroundColor: theme.backgroundColor }]}>{item._data.name}</Text>
                 <Text style={[styles.content, {
-                }]}>{item.name}</Text>
+                }]}>{item._data.name}</Text>
             </View></View>
     }
 
     const ExpandedBodyComponent = ({ item }) => {
+        // console.log('item', item);
         return (
             <View style={[{ flexDirection: 'column' }]} >
                 <View style={[{ flexDirection: 'row' }]} >
@@ -77,11 +78,11 @@ export default BuildPortfolio = ({ navigation, route }) => {
                 </View>
                 <View style={[{ flexDirection: 'row' }]} >
                     <Button onPress={() =>
-                        navigation.navigate('PlaceOrder', { ...item, portfolioId })} title="Buy"></Button>
+                        navigation.navigate('PlaceOrder', { ...item._data, portfolioId })} title="Buy"></Button>
                     <Text style={[{
                         flexGrow: 1,
                         textAlign: 'right'
-                    }]}>{item.entryFee}</Text>
+                    }]}>{item._data.entryFee}</Text>
                 </View>
             </View>)
     }

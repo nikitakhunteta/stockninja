@@ -19,9 +19,9 @@ export default PlaceOrder = ({ route, navigation }) => {
         // get the portfolio value, deduct the amount based on the price *qty 
         // if value is more than available, error
         try {
-            console.log('sending', ticker,
-                price,
-                quantity)
+            // console.log('sending', ticker,
+            //     price,
+            //     quantity)
             const documentRef = await firestore().collection('orders').add({
                 ticker,
                 price,
