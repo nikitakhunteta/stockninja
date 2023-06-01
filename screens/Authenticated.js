@@ -76,14 +76,13 @@ export default function Authenticated({ navigation, route }) {
     return <View>
       <Text style={styles.headerText}>{item.name}</Text>
       <View style={[{
-        backgroundColor: theme.backgroundColor,
         flexDirection: 'row', TouchableOpacity
       }]} >
         <Text style={[styles.content,
-        { backgroundColor: theme.backgroundColor }]}>Total Slots</Text>
+        {
+        }]}>Total Slots</Text>
         <Text style={[styles.content, {
           flexGrow: 1,
-          backgroundColor: theme.backgroundColor,
           textAlign: 'right'
         }]}>{item.totalSlots} {item.freeSlots}</Text>
       </View></View>
@@ -111,16 +110,21 @@ export default function Authenticated({ navigation, route }) {
   }
   const ExpandedBodyComponent = ({ item }) => {
 
-    return <View style={[{ flexDirection: 'column' }]} >
-      <View style={[{ flexDirection: 'row' }]} >
+    return <View style={[{
+      flexDirection: 'column',
+      borderStyle: 'solid',
+      borderColor: theme?.borderColorDark,
+      borderWidth: 1,
+    }]} >
+      <View style={styles.cardInnerContent} >
         <Text >Entry Fee</Text>
         <Text style={[{
           flexGrow: 1,
           textAlign: 'right'
         }]}>Rs.{item.entryFee}</Text>
       </View>
-      <View style={[{ flexDirection: 'row' }]} >
-        <Text >Starts In</Text>
+      <View style={styles.cardInnerContent} >
+        <Text>Starts In</Text>
         <Text style={[{
           flexGrow: 1,
           textAlign: 'right'
@@ -137,8 +141,8 @@ export default function Authenticated({ navigation, route }) {
         </View>
       }
       {item.hasUserJoined &&
-        <View>
-          <Button title="View" onPress={() => viewContestPortfolio(item)} />
+        <View style={{ marginTop: 10 }}>
+          <Button color={Theme.light.primary} title="View" onPress={() => viewContestPortfolio(item)} />
         </View>
       }
     </View>
@@ -153,8 +157,8 @@ export default function Authenticated({ navigation, route }) {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.text}>You're Logged in</Text>
-      <Text style={styles.phoneNumber}>{auth().currentUser.displayName + ' ' + auth().currentUser.phoneNumber}</Text>
+      <Text style={styles.text}>Leagues</Text>
+      {/* <Text style={styles.phoneNumber}>{auth().currentUser.displayName + ' ' + auth().currentUser.phoneNumber}</Text> */}
       <ExpandableCard data={leagues}
         HeaderComponent={HeaderComponent}
         ExpandedBodyComponent={ExpandedBodyComponent}>
@@ -182,7 +186,6 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 2,
-    borderColor: 'lightblue',
     width: 300,
     marginVertical: 30,
     fontSize: 25,
@@ -191,19 +194,25 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 25,
+    color: Theme.light.primary
   },
   phoneNumber: {
     fontSize: 21,
     marginTop: 20,
   },
   content: {
-    paddingLeft: 10,
-    paddingRight: 10,
-    backgroundColor: '#fff',
-  }
+    // paddingLeft: 10,
+    // paddingRight: 10,
+  },
+  cardInnerContent: { flexDirection: 'row', paddingLeft: 10, paddingTop: 10, paddingRight: 10 }
   ,
   headerText: {
     fontSize: 20,
+    color: Theme.light.primary,
     fontWeight: 'bold',
   },
+  button: {
+    color: 'black',
+    backgroundColor: Theme.light.primary,
+  }
 });

@@ -7,9 +7,10 @@ import BuildPortfolio from './screens/BuildPortfolio';
 import PlaceOrder from './screens/PlaceOrder';
 import ContestParticipate from './screens/ViewContestPortfolio';
 import Authenticated from './screens/Authenticated';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import GlobalState from './Context/GlobalState';
+import { Theme } from './theme';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,23 +45,49 @@ export default function App() {
       setAuthenticated(false);
     }
   })
+
+  const navTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: Theme.light.backgroundColor,
+      primary: Theme.light.primary,
+      text: Theme.light.primary
+    },
+  };
+  const headerStyle = {
+    headerStyle: {
+      backgroundColor: Theme.light.tertiary,
+    },
+    headerTintColor: Theme.light.primary,
+    headerTitleStyle: {
+      fontWeight: 'bold',
+    },
+  }
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       <GlobalState uid={uid}>
-        {uid && authenticated ? <Stack.Navigator>
+        {uid && authenticated ? <Stack.Navigator >
           <Stack.Screen
             name="Home"
             component={Authenticated}
             initialParams={{ uid }}
+            options={{
+              title: 'Stock Ninja',
+              ...headerStyle
+            }
+            }
           />
-          <Stack.Screen name="Portfolio" options={{ title: 'Portfolios' }} component={Portfolio} initialParams={{ uid }} />
+          <Stack.Screen name="Portfolio" options={{
+            title: 'Portfolios', ...headerStyle
+          }} component={Portfolio} initialParams={{ uid }} />
           <Stack.Screen name="BuildPortfolio" component={BuildPortfolio} initialParams={{ uid }}
-            options={({ route }) => ({ title: `Portfolio ${route?.params?.name}` })} />
+            options={({ route }) => ({ title: `Portfolio ${route?.params?.name}`, ...headerStyle })} />
           <Stack.Screen name="PlaceOrder" component={PlaceOrder} initialParams={{ uid }}
-            options={{ title: 'Place Order' }}
+            options={{ title: 'Place Order', ...headerStyle }}
           />
           <Stack.Screen name="ViewContestPortfolio" component={ViewContestPortfolio}
-            initialParams={{ uid }} options={({ route }) => ({ title: `Contest Details` })} />
+            initialParams={{ uid }} options={({ route }) => ({ title: `Contest Details`, ...headerStyle })} />
 
         </Stack.Navigator> :
           (confirm ? <VerifyCode onSubmit={confirmVerificationCode} /> :

@@ -1,9 +1,15 @@
+const backColor = '#DDE6ED';
+const frontColor = '#47A992';
+
 export const Theme = {
     light: {
-        primary: '#FFFFFF',
-        secondary: '#FFFFFF',
-        borderColorDark: '#3CB3FF',
-        backgroundColor:'#3399ff'
+        primary: frontColor,
+        secondary: frontColor,
+        borderColorDark: frontColor,
+        backgroundColor: backColor,
+        screenBackgroundColor: backColor,
+        tertiary: '#526D82',
+        fill: '#D2E9E9'//#9DB2BF'
     },
     dark: {
         primary: '#424242',
