@@ -93,7 +93,8 @@ export default function Authenticated({ navigation, route }) {
       league: {
         leagueId: item.leagueId,
         leagueJoinedId: item.leagueJoinedId,
-        entryFee: item.entryFee
+        entryFee: item.entryFee,
+        freeSlots: item.freeSlots
       },
       leagueId: item.leagueId,
       leagueJoinedId: item.leagueJoinedId

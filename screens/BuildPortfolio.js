@@ -15,8 +15,7 @@ import ExpandableCard from './../components/ExpandableCard';
 export default BuildPortfolio = ({ navigation, route }) => {
     const { name, leagueId, leagueJoinedId, portfolioId, uid, ...rest } = route.params;
 
-    const walletDetails = useContext(Context);
-
+    const userContext = useContext(Context);
     const colorTheme = useColorScheme();
     const theme = Theme[colorTheme];
     const [loading, setLoading] = useState(false);
@@ -49,7 +48,7 @@ export default BuildPortfolio = ({ navigation, route }) => {
                     .get();
                 setPortfolioStocks(portfolioStocks?._docs);
             }
-            getOrdersData();
+            leagueJoinedId && getOrdersData();
         });
         return unsubscribe;
     }, [navigation]);
@@ -72,7 +71,6 @@ export default BuildPortfolio = ({ navigation, route }) => {
     }
 
     const ExpandedBodyComponent = ({ item }) => {
-        // console.log('item', item);
         return (
             <View style={[{ flexDirection: 'column' }]} >
                 <View style={[{ flexDirection: 'row' }]} >
@@ -84,7 +82,12 @@ export default BuildPortfolio = ({ navigation, route }) => {
                 </View>
                 <View style={[{ flexDirection: 'row' }]} >
                     <Button onPress={() =>
-                        navigation.navigate('PlaceOrder', { ...item, portfolioId, leagueJoinedId, leagueId })} title="Buy"></Button>
+                        navigation.navigate('PlaceOrder', {
+                            ...item,
+                            portfolio: { ...userContext?.selectedPortfolio },
+                            leagueJoinedId,
+                            leagueId
+                        })} title="Buy"></Button>
                     <Text style={[{
                         flexGrow: 1,
                         textAlign: 'right'
@@ -128,8 +131,8 @@ export default BuildPortfolio = ({ navigation, route }) => {
 
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ flex: 1, width: '100%', }}>
-                <Text> Wallet Amount {walletDetails.walletAmount}</Text>
-                <Text> {portfolioStocks.length ? 30 - distinctStocks : 30} stocks left out of {30}</Text>
+                <Text>Coins remaining: {userContext?.selectedPortfolio?.coinsAvailable}</Text>
+                <Text> {portfolioStocks.length ? 30 - distinctStocks : 30} stocks remaining out of {30}</Text>
                 <SearchBar
                     placeholder="Search Stock..."
                     searchIcon={null}

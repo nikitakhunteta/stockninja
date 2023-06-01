@@ -3,10 +3,31 @@ import firestore from '@react-native-firebase/firestore';
 
 import Context from './context';
 export default GlobalState = (props) => {
-    const [wallet, setWallet] = useState();
+    const [wallet, setWallet] = useState({
+        amount:0,
+        id:''
+    });
+    const [selectedPortfolio, setSelectedPortfolio] = useState(null);
 
-    const deductWalletAmount = (amount) => {
-        setWallet(wallet - amount)
+    const deductWalletAmount = async (amount) => {
+        await firestore()
+            .collection('wallet')
+            .doc(wallet.id)
+            .update({
+                amount: wallet.amount-amount
+            });
+        setWallet({
+            ...wallet,
+            amount:  wallet.amount-amount
+        });
+    };
+
+    const updateSelectedPortfolio = (portfolio) => {
+        setSelectedPortfolio(portfolio);
+    };
+
+    const updateSelectedPortfolioData = (portfolioData) => {
+        setSelectedPortfolio({ ...selectedPortfolio, ...portfolioData });
     };
 
     useEffect(() => {
@@ -14,7 +35,10 @@ export default GlobalState = (props) => {
             async function getData() {
                 if (props.uid) {
                     const userWallet = await firestore().collection('wallet').where('userId', '==', props.uid).get();
-                    setWallet(userWallet._docs[0]._data.amount);
+                    setWallet({
+                        amount: userWallet._docs[0]._data.amount,
+                        id: userWallet._docs[0]?._ref?._documentPath?._parts[1]
+                    });
                 }
             }
             getData()
@@ -26,8 +50,11 @@ export default GlobalState = (props) => {
     return (
         <Context.Provider
             value={{
-                walletAmount: wallet,
+                wallet,
                 deductWalletAmount: deductWalletAmount,
+                updateSelectedPortfolio,
+                selectedPortfolio,
+                updateSelectedPortfolioData
             }}
         >
             {props.children}

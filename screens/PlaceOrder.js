@@ -1,39 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, Button, TextInput, useColorScheme, StyleSheet, Alert } from "react-native"
 import firestore from '@react-native-firebase/firestore';
 import { Theme } from './../theme';
+import Context from '../Context/context';
 
 
 export default PlaceOrder = ({ route, navigation }) => {
     const { ticker, name, uid, portfolioId, leagueJoinedId, leagueId, price = 0 } = route.params;
     const [quantity, onChangeQuantity] = useState(0);
-    const [currentPortfolio, setCurrentPortfolio] = useState(1000);
-    const [availableValue, setAvailableValue] = useState(1000);
+    const [currentPortfolio, setCurrentPortfolio] = useState(route?.params?.portfolio?.coinsAvailable);
     const [quantityError, setQuantityError] = useState("");
+
     let updatedPortfolio = currentPortfolio;
     // const colorTheme = useColorScheme();
+    const userContext = useContext(Context);
 
     const placeOrder = async () => {
         // add this stock to portfolio
         // get the portfolio value, deduct the amount based on the price *qty 
         // if value is more than available, error
         try {
-            // console.log('sending', ticker,
-            //     price,
-            //     quantity)
+         
             await firestore().collection('orders').add({
                 ticker,
                 price,
                 quantity,
                 userId: uid,
-                portfolioId,
-                leagueJoinedId
-            })
-            navigation.goBack();
-            // navigation.navigate('BuildPortfolio', { portfolioId })
-            // params: { post: postText },
+                portfolioId: route.params?.portfolio?.portfolioId,
+                leagueJoinedId: leagueJoinedId ?? null
+            });
 
-        } catch (err) {
+            userContext?.updateSelectedPortfolioData({
+                coinsAvailable: (currentPortfolio - quantity * price)
+            });
+            route?.params?.portfolio?.portfolioId && await firestore().collection('portfolios')
+                .doc(route.params?.portfolio?.portfolioId)
+                .update({
+                    coinsAvailable: (currentPortfolio - quantity * price)
+                })
+                .then(() => {
+                });
+            // update the contest chips available
+            navigation.goBack();
+
+[]        } catch (err) {
             console.log('err', err);
             Alert.alert(err);
         }
@@ -56,7 +66,7 @@ export default PlaceOrder = ({ route, navigation }) => {
             padding: 10
         }]} >
             <Text style={[styles.content,
-            ]}>{name} </Text>
+            ]}> {currentPortfolio}{name} </Text>
             <Text style={[styles.content, {
             }]}>Price: {price} </Text>
             <Text style={[styles.content, {

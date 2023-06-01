@@ -1,6 +1,11 @@
 import React from 'react';
 
 export default React.createContext({
-  walletAmount: 0,
+  wallet: {
+    
+  },
   deductAmount: (amount) => { },
+  updateSelectedPortfolio: (portfolio) => { },
+  selectedPortfolio: null,
+  updateSelectedPortfolioData: (portfolioData) => { },
 });

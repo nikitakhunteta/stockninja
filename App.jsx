@@ -60,7 +60,7 @@ export default function App() {
             options={{ title: 'Place Order' }}
           />
           <Stack.Screen name="ViewContestPortfolio" component={ViewContestPortfolio}
-            initialParams={{ uid }} options={({ route }) => ({ title: `Portfolio Details` })} />
+            initialParams={{ uid }} options={({ route }) => ({ title: `Contest Details` })} />
 
         </Stack.Navigator> :
           (confirm ? <VerifyCode onSubmit={confirmVerificationCode} /> :
