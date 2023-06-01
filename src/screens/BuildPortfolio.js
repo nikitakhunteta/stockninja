@@ -8,8 +8,8 @@ import { } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
-import { Theme } from './../theme';
-import ExpandableCard from './../components/ExpandableCard';
+import { Theme } from '../../theme';
+import ExpandableCard from '../components/ExpandableCard';
 
 
 export default BuildPortfolio = ({ navigation, route }) => {

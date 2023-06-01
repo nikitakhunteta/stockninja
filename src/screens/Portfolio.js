@@ -9,9 +9,9 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
 
-import { TOTAL_PORTFOLIO_ALLOWED, COINS_IN_EACH_LEAGUE } from './../constants';
+import { TOTAL_PORTFOLIO_ALLOWED, COINS_IN_EACH_LEAGUE } from '../../constants';
 import { CheckBox } from 'react-native-elements';
-import { Theme } from './../theme';
+import { Theme } from '../../theme';
 
 export default Portfolio = ({ navigation, route }) => {
 

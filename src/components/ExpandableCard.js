@@ -11,7 +11,7 @@ import {
     Platform,
     useColorScheme
 } from 'react-native';
-import { Theme } from './../theme';
+import { Theme } from '../../theme';
 
 const ExpandableComponent = ({ item, onClickFunction, HeaderComponent, ExpandedBodyComponent }) => {
     const colorTheme = useColorScheme();

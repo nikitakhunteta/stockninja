@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 import React from 'react';
-import { useCountdown } from './../Hooks/useCountdown';
+import { useCountdown } from '../Hooks/useCountdown';
 
 const DateTimeDisplay = ({ value, type }) => {
     return (

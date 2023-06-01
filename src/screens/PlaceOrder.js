@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, Button, TextInput, useColorScheme, StyleSheet, Alert } from "react-native"
 import firestore from '@react-native-firebase/firestore';
-import { Theme } from './../theme';
+import { Theme } from '../../theme';
 import Context from '../Context/context';
 
 

@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native"
 import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
-import { Theme } from '../theme';
+import { Theme } from '../../theme';
 
 export default ViewContestPortfolio = ({ navigation, route }) => {
 

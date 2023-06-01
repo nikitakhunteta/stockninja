@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { } from 'react-native-gesture-handler';
 import Context from '../Context/context';
-import { Theme } from './../theme';
+import { Theme } from '../../theme';
 
 export default AddMoney = ({ navigation }) => {
     const [amount, onChangeAmount] = useState();

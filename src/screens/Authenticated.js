@@ -9,7 +9,7 @@ import firestore from '@react-native-firebase/firestore';
 import ExpandableCard from '../components/ExpandableCard';
 import Timer from '../components/Timer';
 import Portfolio from './Portfolio';
-import { Theme } from './../theme';
+import { Theme } from '../../theme';
 
 export default function Authenticated({ navigation, route }) {
   const { leagueId, portfolioId, uid } = route.params;
