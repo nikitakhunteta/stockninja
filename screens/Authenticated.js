@@ -28,51 +28,49 @@ export default function Authenticated({ navigation, route }) {
   };
 
   useEffect(() => {
-    setLoading(true);
-    let currentDate = new Date();
-    try {
-      async function getData() {
-        const leagues = await firestore().collection('leagues').get();
-        const leaguesJoined = await firestore().collection('leaguesJoined').where('userId', '==', uid).get();
-        let leagueDocMapping = {};
 
-        let leaguesJoinedIds = leaguesJoined?._docs?.map(x => {
-          leagueDocMapping[x._data.leagueId] = {
-            leagueJoinedId: x._ref._documentPath._parts[1],
-            portfolioId: x._data.portfolioId,
-          }
-          return x._data.leagueId
-        });
-
-        let data = leagues?._docs.map(v => {
-          let leagueId = v._ref._documentPath._parts[1];
-          return ({
-            ...v._data,
-            hasStarted: dateInPast(v?._data?.startDateTime, currentDate),
-            leagueId,
-            hasUserJoined: leaguesJoinedIds?.includes(leagueId),
-            leagueJoinedId: leagueDocMapping[leagueId]?.leagueJoinedId,
-            portfolioId: leagueDocMapping[leagueId]?.portfolioId,
-          })
-        });
-        setLeagues(data);
-        setLoading(false);
-      }
-      getData()
-
-      // join this with leagues participated 
-
-    } catch (e) {
-      setLoading(false);
-    }
   }, [route.params?.leagueJoinedId]);
 
-  // useEffect(() => {
-  //   const unsubscribe = navigation.addListener('focus', () => {
-  //     console.log('focus on home screen', uid)
-  //   });
-  //   return unsubscribe;
-  // }, [navigation]);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setLoading(true);
+      let currentDate = new Date();
+      try {
+        async function getData() {
+          // ToDO: to get those which are active or will start in 24hrs
+          const leagues = await firestore().collection('leagues').get();
+          const leaguesJoined = await firestore().collection('leaguesJoined').where('userId', '==', uid).get();
+          let leagueDocMapping = {};
+          let leaguesJoinedIds = leaguesJoined?._docs?.map(x => {
+            leagueDocMapping[x._data.leagueId] = {
+              leagueJoinedId: x._ref._documentPath._parts[1],
+              portfolioId: x._data.portfolioId,
+            }
+            return x._data.leagueId
+          });
+
+          let data = leagues?._docs.map(v => {
+            let leagueId = v._ref._documentPath._parts[1];
+            return ({
+              ...v._data,
+              hasStarted: dateInPast(v?._data?.startDateTime, currentDate),
+              leagueId,
+              hasUserJoined: leaguesJoinedIds?.includes(leagueId),
+              leagueJoinedId: leagueDocMapping[leagueId]?.leagueJoinedId,
+              portfolioId: leagueDocMapping[leagueId]?.portfolioId,
+            })
+          });
+
+          setLeagues(data);
+          setLoading(false);
+        }
+        getData()
+      } catch (e) {
+        setLoading(false);
+      }
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const HeaderComponent = ({ item }) => {
     return <View>
@@ -87,18 +85,26 @@ export default function Authenticated({ navigation, route }) {
           flexGrow: 1,
           backgroundColor: theme.backgroundColor,
           textAlign: 'right'
-        }]}>{item.totalSlots}</Text>
+        }]}>{item.totalSlots} {item.freeSlots}</Text>
       </View></View>
   }
   const participateInContest = (item) => {
-    navigation.navigate('Portfolio', { leagueId: item.leagueId, leagueJoinedId: item.leagueJoinedId })
+    navigation.navigate('Portfolio', {
+      league: {
+        leagueId: item.leagueId,
+        leagueJoinedId: item.leagueJoinedId,
+        entryFee: item.entryFee
+      },
+      leagueId: item.leagueId,
+      leagueJoinedId: item.leagueJoinedId
+    })
     // call lock seat api 
     // select the portfolio to be used 
   }
   const viewContestPortfolio = (item) => {
     navigation.navigate('ViewContestPortfolio', {
       leagueId: item.leagueId,
-      leagueJoinedId: item.leagueJoinedId, 
+      leagueJoinedId: item.leagueJoinedId,
       portfolioId: item.portfolioId
     })
   }
@@ -126,7 +132,7 @@ export default function Authenticated({ navigation, route }) {
       {!item.hasUserJoined &&
 
         <View>
-          <Button title="Participate" disabled={item.hasStarted} onPress={() => participateInContest(item)} />
+          <Button title="Participate" disabled={item.hasStarted || item.freeSlots === 0} onPress={() => participateInContest(item)} />
         </View>
       }
       {item.hasUserJoined &&

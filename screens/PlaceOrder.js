@@ -5,12 +5,11 @@ import { Theme } from './../theme';
 
 
 export default PlaceOrder = ({ route, navigation }) => {
-    const { ticker,name, uid , portfolioId, price=0} = route.params;
+    const { ticker, name, uid, portfolioId, leagueJoinedId, leagueId, price = 0 } = route.params;
     const [quantity, onChangeQuantity] = useState(0);
     const [currentPortfolio, setCurrentPortfolio] = useState(1000);
     const [availableValue, setAvailableValue] = useState(1000);
     const [quantityError, setQuantityError] = useState("");
-
     let updatedPortfolio = currentPortfolio;
     // const colorTheme = useColorScheme();
 
@@ -22,18 +21,18 @@ export default PlaceOrder = ({ route, navigation }) => {
             // console.log('sending', ticker,
             //     price,
             //     quantity)
-            const documentRef = await firestore().collection('orders').add({
+            await firestore().collection('orders').add({
                 ticker,
                 price,
                 quantity,
                 userId: uid,
-                portfolioId
-
+                portfolioId,
+                leagueJoinedId
             })
             navigation.goBack();
             // navigation.navigate('BuildPortfolio', { portfolioId })
             // params: { post: postText },
-            
+
         } catch (err) {
             console.log('err', err);
             Alert.alert(err);
@@ -73,7 +72,7 @@ export default PlaceOrder = ({ route, navigation }) => {
             {quantityError.length > 0 &&
                 <Text style={{ color: 'red', paddingLeft: 12, paddingBottom: 10 }}>{quantityError}</Text>
             }
-            <Button disabled={quantityError.length > 0 || quantity ==0 } onPress={placeOrder} title="Buy"></Button>
+            <Button disabled={quantityError.length > 0 || quantity == 0} onPress={placeOrder} title="Buy"></Button>
 
         </View></View>
 }

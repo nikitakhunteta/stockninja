@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     View, Text, TouchableOpacity, ActivityIndicator,
     useColorScheme, Button, FlatList, StyleSheet,
@@ -7,12 +7,16 @@ import {
 import { } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import firestore from '@react-native-firebase/firestore';
+import Context from '../Context/context';
 import { Theme } from './../theme';
 import ExpandableCard from './../components/ExpandableCard';
 
 
 export default BuildPortfolio = ({ navigation, route }) => {
     const { name, leagueId, leagueJoinedId, portfolioId, uid, ...rest } = route.params;
+
+    const walletDetails = useContext(Context);
+
     const colorTheme = useColorScheme();
     const theme = Theme[colorTheme];
     const [loading, setLoading] = useState(false);
@@ -27,10 +31,11 @@ export default BuildPortfolio = ({ navigation, route }) => {
         setLoading(true);
         async function getStocksData() {
             const topStocks = await firestore().collection('top-10-stocks').get();
-            setMasterStocks(topStocks?._docs);
+            let data = topStocks?._docs?.map(s => ({ ...s._data, id: s?._ref._documentPath._parts[1] }))
+            setMasterStocks(data);
             setError(null);
             setLoading(false);
-            setMasterStocksData(topStocks?._docs)
+            setMasterStocksData(data)
         }
         getStocksData();
     }, []);
@@ -40,7 +45,7 @@ export default BuildPortfolio = ({ navigation, route }) => {
             async function getOrdersData() {
                 //need to get by leagues joined id 
                 const portfolioStocks = await firestore().collection('orders')
-                    .where('userId', '==', uid).where('portfolioId', '==', portfolioId)
+                    .where('userId', '==', uid).where('leagueJoinedId', '==', leagueJoinedId)
                     .get();
                 setPortfolioStocks(portfolioStocks?._docs);
             }
@@ -60,9 +65,9 @@ export default BuildPortfolio = ({ navigation, route }) => {
                 flexDirection: 'column', TouchableOpacity
             }]} >
                 <Text style={[styles.content,
-                { backgroundColor: theme.backgroundColor }]}>{item._data.name}</Text>
+                { backgroundColor: theme.backgroundColor }]}>{item.name}</Text>
                 <Text style={[styles.content, {
-                }]}>{item._data.name}</Text>
+                }]}>{item.name}</Text>
             </View></View>
     }
 
@@ -79,11 +84,11 @@ export default BuildPortfolio = ({ navigation, route }) => {
                 </View>
                 <View style={[{ flexDirection: 'row' }]} >
                     <Button onPress={() =>
-                        navigation.navigate('PlaceOrder', { ...item._data, portfolioId })} title="Buy"></Button>
+                        navigation.navigate('PlaceOrder', { ...item, portfolioId, leagueJoinedId, leagueId })} title="Buy"></Button>
                     <Text style={[{
                         flexGrow: 1,
                         textAlign: 'right'
-                    }]}>{item._data.entryFee}</Text>
+                    }]}>{item.entryFee}</Text>
                 </View>
             </View>)
     }
@@ -123,7 +128,7 @@ export default BuildPortfolio = ({ navigation, route }) => {
 
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ flex: 1, width: '100%', }}>
-                <Text> Portfolio {name} </Text>
+                <Text> Wallet Amount {walletDetails.walletAmount}</Text>
                 <Text> {portfolioStocks.length ? 30 - distinctStocks : 30} stocks left out of {30}</Text>
                 <SearchBar
                     placeholder="Search Stock..."

@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
 import { View, Text, Button, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList, Alert } from "react-native"
 import firestore from '@react-native-firebase/firestore';
+import Context from '../Context/context';
 
 import { TOTAL_PORTFOLIO_ALLOWED } from './../constants';
 import { CheckBox } from 'react-native-elements';
 
 export default Portfolio = ({ navigation, route }) => {
-    
-    const { uid, leagueId, leagueJoinedId, portfolioId } = route.params;
+
+    const { uid, portfolioId, league } = route.params;
     const [portfolios, setPortfolios] = useState([]);
     const [addPortfolio, setAddPortfolio] = useState(false);
     const [portfolioName, onChangePortfolioName] = useState();
     const [loading, setLoading] = useState(false);
-    const [checked, setChecked] = React.useState('first');
+    const [checked, setChecked] = React.useState('');
+    const [selectedPortfolio, setSelectedPortfolio] = React.useState(null);
+    const userContext = useContext(Context);
 
     //TODO: optmiize this with local state of data
     useEffect(() => {
@@ -23,24 +26,17 @@ export default Portfolio = ({ navigation, route }) => {
             const portfolios = await firestore().collection('portfolios').where('userId', '==', uid).get();
             let data = portfolios?._docs?.map(portfolio => ({ ...portfolio, isSelected: false, id: portfolio?._ref._documentPath._parts[1] }))
             setPortfolios(data);
-            // console.log('portfolios ref',portfolios?._docs[0]._ref._documentPath._parts[1])
         }
         getPortfolios()
         setLoading(false)
     }, [addPortfolio]);
 
-    // useEffect(()=>{
-    //     Alert.alert('landed')
-    // },[])
-
     const fetchData = async () => {
         try {
-            // console.log('started')
             // const resp = await fetch('https://randomuser.me/api/?&results=1');
             const resp = await fetch('http://10.0.2.2:3000/?symbol=RELIANCE');
             const data = await resp.json();
             // // setData(data);
-            // console.log(data)
         } catch (err) {
             console.log('err', err)
         }
@@ -57,8 +53,8 @@ export default Portfolio = ({ navigation, route }) => {
             navigation.navigate('BuildPortfolio', {
                 name: portfolioName,
                 portfolioId: documentRef._documentPath._parts[1],
-                leagueId,
-                leagueJoinedId
+                leagueId: league?.leagueId,
+                leagueJoinedId: league?.leagueJoinedId
             })
         } catch (err) {
             console.log('err', err)
@@ -66,29 +62,42 @@ export default Portfolio = ({ navigation, route }) => {
     }
 
     const getPortfolioDetails = (name, portfolioId) => {
-        navigation.navigate('BuildPortfolio', { name, portfolioId, leagueJoinedId, leagueId });
+        if (league?.leagueJoinedId) {
+            navigation.navigate('BuildPortfolio', {
+                name, portfolioId,
+                leagueJoinedId: league?.leagueJoinedId,
+                leagueId: league?.leagueId
+            });
+        }
     }
-    const joinLeague = async () => {
-        // select portfolio id, send to league page 
+    /*
+     select portfolio id, send to league page 
         // activate the league for the user
-        // redirect to home pg
-        // console.log('returning to Home', leagueId,checked);
-
+        // for joining, need to deduct amount from the wallet worth game price 
+        // if not sufficient balance, need to add money 
+        // also, lock the seat and reduce available seats by 1
+        // later need to add websocket to update number of seats available
+         */
+    const joinLeague = async () => {
+        //check the amount in wallet of user 
+        const walletAmount = userContext.walletAmount;
+        //TODO: deduct money form wallet
+        if (league?.entryFee > walletAmount) {
+            Alert.alert('Insufficient balance');
+            return;
+        }
+        userContext?.deductWalletAmount(selectedPortfolio.entryFee);
         const leagueJoinedDoc = await firestore().collection('leaguesJoined').add({
-            leagueId,
+            leagueId: league?.leagueId,
             userId: uid,
             portfolioId: checked,
             rank: null
         });
-        // console.log('leagueJoinedDoc', leagueJoinedDoc)
-        navigation.navigate({
-            name: 'Home',
-            params: {
-                leagueId: leagueId,
-                portfolioId: checked,
-                leagueJoinedId: leagueJoinedDoc?._documentPath._parts[1]
-            },
-            merge: true,
+
+        navigation.replace('BuildPortfolio', {
+            ...selectedPortfolio,
+            leagueJoinedId: leagueJoinedDoc?._documentPath._parts[1],
+            leagueId: league?.leagueId
         })
     }
     const Item = ({ item }) => {
@@ -98,27 +107,34 @@ export default Portfolio = ({ navigation, route }) => {
                 onPress={() => getPortfolioDetails(item?._data?.name, item?._ref?._documentPath?._parts[1])}
             ><View
                 style={{
-                    padding: 10,
-                    borderStyle: 'solid',
-                    borderWidth: 1,
-                    borderColor: 'gray', color: 'black', flexDirection: 'row'
+                    marginBottom: 10,
+                    flexDirection: 'row'
                 }}
-                // item?._ref?._documentPath?._parts[1]
                 key={item._data.name}>
                     <CheckBox
-                        value={item?._ref?._documentPath?._parts[1]}
+                        style={styles.checkbox}
                         checked={checked === item?._ref?._documentPath?._parts[1]}
-                        onPress={() => setChecked(item?._ref?._documentPath?._parts[1])}
+                        onPress={() => {
+                            let id = item?._ref?._documentPath?._parts[1]
+                            setChecked(id);
+                            setSelectedPortfolio({
+                                name: item?._data?.name,
+                                portfolioId: id,
+                                entryFee: league?.entryFee
+                            });
+
+                            if (userContext.walletAmount < league?.entryFee) {
+                                //TODO: show error and disable the join button
+                                // show add money button 
+                            }
+                        }}
                     />
-                    <Text>{item._data.name} {item?._ref?._documentPath?._parts[1]} {item.isSelected.toString()}</Text></View>
+                    <Text style={styles.label}>{item._data.name}</Text></View>
             </TouchableOpacity>
         )
     };
 
-    return <View style={[styles.screen, {
-        width: '100%'
-    }]} ><Text>Portfolios leagueId {leagueId} - leagueJoinedId {leagueJoinedId}</Text>
-
+    return <View style={[styles.screen]} >
         {loading && <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <ActivityIndicator />
         </View>}
@@ -128,12 +144,13 @@ export default Portfolio = ({ navigation, route }) => {
             keyExtractor={item => item.id}
         />
 
-        {/* <Button title="Click Me" onPress={fetchData}></Button> */}
-        {portfolios.length < TOTAL_PORTFOLIO_ALLOWED ? <View style={{ alignItems: 'center' }}><Button title="Build Portfolio"
+        {portfolios.length < TOTAL_PORTFOLIO_ALLOWED ? <View style={styles.buttonContainer}><Button title="Build Portfolio"
             onPress={() => { setAddPortfolio(true) }}>
-        </Button></View> : null}
-        <Button title='Join' onPress={joinLeague} />
-
+        </Button></View> : null
+        }
+        <View style={styles.buttonContainer}>
+            <Button title='Join' disabled={!checked} onPress={joinLeague} />
+        </View>
         {addPortfolio && <View style={{ alignItems: 'center' }} >
             <TextInput style={styles.input} onChangeText={onChangePortfolioName} placeholder='Portfolio Name'></TextInput>
             <Button title='save' onPress={savePortfolio}></Button>
@@ -143,15 +160,26 @@ export default Portfolio = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
     input: {
-        height: 40,
-        borderColor: 'gray',
+        // height: 40,
+        // borderColor: 'gray',
         borderWidth: 1,
         margin: 20,
         width: '80%'
     },
     screen: {
+        width: '100%'
         // flex: 1,
         // justifyContent: 'center',
         // alignItems: 'center',
+    },
+    checkbox: {
+        alignSelf: 'center',
+        borderColor: 'red',
+        borderWidth: 1,
+    },
+    buttonContainer: {
+        alignItems: 'center', margin: 10
+    }, label: {
+        margin: 8,
     },
 });

@@ -9,6 +9,7 @@ import ContestParticipate from './screens/ViewContestPortfolio';
 import Authenticated from './screens/Authenticated';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import GlobalState from './Context/GlobalState';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,20 +45,25 @@ export default function App() {
     }
   })
   return (
-  <NavigationContainer>
-    {uid && authenticated ? <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={Authenticated}
-        initialParams={{ uid }}
-      />
-      <Stack.Screen name="Portfolio" component={Portfolio} initialParams={{ uid }} />
-      <Stack.Screen name="BuildPortfolio" component={BuildPortfolio} initialParams={{ uid }} />
-      <Stack.Screen name="PlaceOrder" component={PlaceOrder} initialParams={{ uid }} />
-      <Stack.Screen name="ViewContestPortfolio" component={ViewContestPortfolio} initialParams={{ uid }} />
+    <NavigationContainer>
+      <GlobalState uid={uid}>
+        {uid && authenticated ? <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={Authenticated}
+            initialParams={{ uid }}
+          />
+          <Stack.Screen name="Portfolio" options={{ title: 'Portfolios' }} component={Portfolio} initialParams={{ uid }} />
+          <Stack.Screen name="BuildPortfolio" component={BuildPortfolio} initialParams={{ uid }}
+            options={({ route }) => ({ title: `Portfolio ${route?.params?.name}` })} />
+          <Stack.Screen name="PlaceOrder" component={PlaceOrder} initialParams={{ uid }}
+            options={{ title: 'Place Order' }}
+          />
+          <Stack.Screen name="ViewContestPortfolio" component={ViewContestPortfolio}
+            initialParams={{ uid }} options={({ route }) => ({ title: `Portfolio Details` })} />
 
-    </Stack.Navigator> :
-      (confirm ? <VerifyCode onSubmit={confirmVerificationCode} /> :
-        <PhoneNumber onSubmit={signIn} />)}
-  </NavigationContainer>);
+        </Stack.Navigator> :
+          (confirm ? <VerifyCode onSubmit={confirmVerificationCode} /> :
+            <PhoneNumber onSubmit={signIn} />)}
+      </GlobalState></NavigationContainer>);
 }
