@@ -1,11 +1,16 @@
 import React, { useEffect, useState, useContext } from 'react';
 
-import { View, Text, Button, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList, Alert } from "react-native"
+import {
+    View, Text, Button,
+    TextInput, StyleSheet, TouchableOpacity,
+    ActivityIndicator, FlatList, Alert
+} from "react-native"
 import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
 
 import { TOTAL_PORTFOLIO_ALLOWED, COINS_IN_EACH_LEAGUE } from './../constants';
 import { CheckBox } from 'react-native-elements';
+import { Theme } from './../theme';
 
 export default Portfolio = ({ navigation, route }) => {
 
@@ -154,11 +159,17 @@ export default Portfolio = ({ navigation, route }) => {
             ><View
                 style={{
                     marginBottom: 10,
-                    flexDirection: 'row'
+                    flexDirection: 'row',
+                    borderColor: Theme.light.primary,
+                    borderBottomWidth: 1,
+                    alignItems: 'center',
+                    borderStyle: 'solid'
                 }}
                 key={item._data.name}>
                     <CheckBox
-                        style={styles.checkbox}
+                        // style={styles.checkbox}
+                        color={checked === item?._ref?._documentPath?._parts[1] ? 'red' : undefined}
+
                         checked={checked === item?._ref?._documentPath?._parts[1]}
                         onPress={() => {
                             let id = item?._ref?._documentPath?._parts[1]
@@ -174,8 +185,14 @@ export default Portfolio = ({ navigation, route }) => {
                                 // show add money button 
                             }
                         }}
+                        center
+                        iconRight
+                        iconType='material'
+                        checkedIcon='clear'
+                        uncheckedIcon='add'
+                        checkedColor='black'
                     />
-                    <Text style={styles.label}>{item._data.name} {item._data.isAvailable.toString()}</Text></View>
+                    <Text style={[styles.label, {}]}>{item._data.name}</Text></View>
             </TouchableOpacity>
         )
     };
@@ -189,18 +206,24 @@ export default Portfolio = ({ navigation, route }) => {
             renderItem={({ item }) => <Item item={item} />}
             keyExtractor={item => item.id}
         />
-
-        {portfolios.length < TOTAL_PORTFOLIO_ALLOWED ? <View style={styles.buttonContainer}><Button title="Build Portfolio"
-            onPress={() => { setAddPortfolio(true) }}>
-        </Button></View> : null
+        {portfolios?.length > 0 && <View style={styles.buttonContainer}>
+            <Button color={Theme.light.primary}
+                title='Join'
+                disabled={!checked}
+                onPress={joinLeague} />
+        </View>}
+        {portfolios.length < TOTAL_PORTFOLIO_ALLOWED && !addPortfolio ? <View style={styles.buttonContainer}>
+            <Button title="Add Portfolio" color={Theme.light.primary}
+                onPress={() => { setAddPortfolio(true) }}>
+            </Button></View> : null
         }
-        <View style={styles.buttonContainer}>
-            <Button title='Join' disabled={!checked} onPress={joinLeague} />
-        </View>
+
         {addPortfolio && <View style={{ alignItems: 'center' }} >
             <TextInput style={styles.input} onChangeText={onChangePortfolioName} placeholder='Portfolio Name'></TextInput>
-            <Button title='save' onPress={savePortfolio}></Button>
-        </View>}
+            <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                <Button color={Theme.light.primary} title='save' onPress={savePortfolio}></Button>
+                <Button color={Theme.light.primary} title='Cancel' onPress={() => { setAddPortfolio(false) }}></Button>
+            </View></View>}
     </View>
 }
 
@@ -210,18 +233,17 @@ const styles = StyleSheet.create({
         // borderColor: 'gray',
         borderWidth: 1,
         margin: 20,
+        borderColor: Theme.light.borderColorDark,
         width: '80%'
     },
     screen: {
         width: '100%'
-        // flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center',
+
     },
     checkbox: {
-        alignSelf: 'center',
-        borderColor: 'red',
-        borderWidth: 1,
+        // alignSelf: 'center',
+        // borderColor: 'red',
+        // borderWidth: 1,
     },
     buttonContainer: {
         alignItems: 'center', margin: 10

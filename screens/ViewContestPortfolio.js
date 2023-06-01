@@ -28,7 +28,7 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
         getData();
     }, [portfolioId]);
 
-    
+
     const getPortfolioDetails = (name, portfolioId) => {
         userContext?.updateSelectedPortfolio({ name, portfolioId, leagueJoinedId, leagueId, ...portfolio._data });
         navigation.navigate('BuildPortfolio', { name, portfolioId, leagueJoinedId, leagueId });
@@ -51,16 +51,17 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
                 <Text style={styles.headerText}>{portfolio?._data.name} </Text>
                 <View style={[{
                     flexDirection: 'row',
-                    TouchableOpacity
+                    TouchableOpacity,
+                    justifyContent: 'space-between'
                 }]} >
                     <Text>Coins Available</Text>
-                    <Text style={[styles.content]}>{portfolio?._data?.coinsAvailable}</Text>
+                    <Text>{portfolio?._data?.coinsAvailable}</Text>
                 </View>
             </View>
         </TouchableOpacity>
-        <View style={{ marginTop: 10}}>
-        <Text style={[styles.subHeader]}> Contest Details</Text>
-        <Text> if ended, show user rank and top 10 rankers</Text>
+        <View style={{ marginTop: 10 }}>
+            <Text style={[styles.subHeader]}> Contest Details</Text>
+            <Text> if ended, show user rank and top 10 rankers</Text>
         </View>
     </View>
 }
@@ -80,27 +81,16 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: 'bold',
         elevation: 20,
-        // margin: 10,
         padding: 10,
-        borderStyle: 'solid',
-        borderWidth: 1,
-        borderRadius: 5,
-        borderColor: Theme.light.borderColorDark,
     },
     headerText: {
         fontSize: 16,
-        // color: Theme.light.primary,
         fontWeight: 'bold',
     },
     subHeader: {
-        // padding: 10,
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 10
     },
-    content: {
-        flexGrow: 1,
-        textAlign: 'right',
-        // paddingRight: 10
-    }
+
 });

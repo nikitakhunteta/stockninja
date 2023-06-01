@@ -76,14 +76,13 @@ export default function Authenticated({ navigation, route }) {
     return <View>
       <Text style={styles.headerText}>{item.name}</Text>
       <View style={[{
-        flexDirection: 'row', TouchableOpacity
+        flexDirection: 'row', TouchableOpacity,
+        justifyContent: 'space-between'
       }]} >
         <Text style={[styles.content,
         {
         }]}>Total Slots</Text>
         <Text style={[styles.content, {
-          flexGrow: 1,
-          textAlign: 'right'
         }]}>{item.totalSlots} {item.freeSlots}</Text>
       </View></View>
   }
@@ -114,21 +113,16 @@ export default function Authenticated({ navigation, route }) {
       flexDirection: 'column',
       borderStyle: 'solid',
       borderColor: theme?.borderColorDark,
-      borderWidth: 1,
+      borderTopWidth: 1,
+      backgroundColor: '#C4DFDF'
     }]} >
       <View style={styles.cardInnerContent} >
-        <Text >Entry Fee</Text>
-        <Text style={[{
-          flexGrow: 1,
-          textAlign: 'right'
-        }]}>Rs.{item.entryFee}</Text>
+        <Text>Entry Fee</Text>
+        <Text>Rs.{item.entryFee}</Text>
       </View>
       <View style={styles.cardInnerContent} >
         <Text>Starts In</Text>
-        <Text style={[{
-          flexGrow: 1,
-          textAlign: 'right'
-        }]}>
+        <Text>
           <Timer targetDate={item.startDateTime?.seconds * 1000}></Timer>
         </Text>
 
@@ -136,8 +130,8 @@ export default function Authenticated({ navigation, route }) {
       </View>
       {!item.hasUserJoined &&
 
-        <View>
-          <Button title="Participate" disabled={item.hasStarted || item.freeSlots === 0} onPress={() => participateInContest(item)} />
+        <View style={{ marginTop: 10 }}>
+          <Button color={Theme.light.primary} title="Participate" disabled={item.hasStarted || item.freeSlots === 0} onPress={() => participateInContest(item)} />
         </View>
       }
       {item.hasUserJoined &&
@@ -204,7 +198,10 @@ const styles = StyleSheet.create({
     // paddingLeft: 10,
     // paddingRight: 10,
   },
-  cardInnerContent: { flexDirection: 'row', paddingLeft: 10, paddingTop: 10, paddingRight: 10 }
+  cardInnerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', paddingLeft: 10, paddingTop: 10, paddingRight: 10
+  }
   ,
   headerText: {
     fontSize: 20,

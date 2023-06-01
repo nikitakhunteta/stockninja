@@ -16,7 +16,6 @@ import { Theme } from './../theme';
 const ExpandableComponent = ({ item, onClickFunction, HeaderComponent, ExpandedBodyComponent }) => {
     const colorTheme = useColorScheme();
     const theme = Theme[colorTheme];
-    console.log('theme', colorTheme)
     //Custom Component for the Expandable List
     const [layoutHeight, setLayoutHeight] = useState(0);
     useEffect(() => {
@@ -31,15 +30,15 @@ const ExpandableComponent = ({ item, onClickFunction, HeaderComponent, ExpandedB
 
         <View style={{
             margin: 10,
-            borderRadius: 5,
+            borderRadius: 15,
             borderStyle: 'solid',
-             borderWidth: 1,
-            borderColor: theme.borderColorDark,
+            //  borderWidth: 1,
+            // borderColor: theme.borderColorDark,
             shadowColor: theme.tertiary,
             shadowOffset: { width: -2, height: 4 },
             shadowOpacity: 0.2,
             shadowRadius: 3,
-            // elevation: 20,
+            elevation: 10,
         }}>
             {/*Header of the Expandable List Item*/}
             <TouchableOpacity

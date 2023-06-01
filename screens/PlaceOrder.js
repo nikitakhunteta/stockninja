@@ -7,7 +7,7 @@ import Context from '../Context/context';
 
 export default PlaceOrder = ({ route, navigation }) => {
     const { ticker, name, uid, portfolioId, leagueJoinedId, leagueId, price = 0 } = route.params;
-    const [quantity, onChangeQuantity] = useState(0);
+    const [quantity, onChangeQuantity] = useState('');
     const [currentPortfolio, setCurrentPortfolio] = useState(route?.params?.portfolio?.coinsAvailable);
     const [quantityError, setQuantityError] = useState("");
 
@@ -20,7 +20,7 @@ export default PlaceOrder = ({ route, navigation }) => {
         // get the portfolio value, deduct the amount based on the price *qty 
         // if value is more than available, error
         try {
-         
+
             await firestore().collection('orders').add({
                 ticker,
                 price,
@@ -43,7 +43,8 @@ export default PlaceOrder = ({ route, navigation }) => {
             // update the contest chips available
             navigation.goBack();
 
-[]        } catch (err) {
+            []
+        } catch (err) {
             console.log('err', err);
             Alert.alert(err);
         }
@@ -63,14 +64,24 @@ export default PlaceOrder = ({ route, navigation }) => {
     return <View>
         <View style={[{
             flexDirection: 'column',
-            padding: 10
+            padding: 10,
         }]} >
-            <Text style={[styles.content,
-            ]}> {currentPortfolio}{name} </Text>
-            <Text style={[styles.content, {
-            }]}>Price: {price} </Text>
-            <Text style={[styles.content, {
-            }]}>Quantity: {quantity} </Text>
+            <View style={{ flexDirection: 'row' }}>
+                <Text style={[styles.contentHeading]}>Remaining Coins: </Text>
+                <Text style={[styles.content]}> {currentPortfolio} </Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+                <Text style={[styles.contentHeading]}>Stock: </Text>
+                <Text style={[styles.content]}>{name}</Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+                <Text style={[styles.contentHeading]}>Price:</Text>
+                <Text style={[styles.content]}> {price} </Text>
+            </View>
+            {/* <View style={{ flexDirection: 'row' }}>
+                <Text style={[styles.content]}>Quantity:</Text>
+                <Text style={[styles.content]}> {quantity} </Text>
+            </View> */}
             <TextInput
                 style={styles.input}
                 onChangeText={updatePortfolio}
@@ -82,8 +93,11 @@ export default PlaceOrder = ({ route, navigation }) => {
             {quantityError.length > 0 &&
                 <Text style={{ color: 'red', paddingLeft: 12, paddingBottom: 10 }}>{quantityError}</Text>
             }
-            <Button disabled={quantityError.length > 0 || quantity == 0} onPress={placeOrder} title="Buy"></Button>
-
+            <Button 
+                color={Theme.light.primary}
+                disabled={quantityError.length > 0 || quantity == 0}
+                onPress={placeOrder}
+                title="Buy"></Button>
         </View></View>
 }
 
@@ -92,12 +106,21 @@ const styles = StyleSheet.create({
     input: {
         borderStyle: 'solid',
         borderWidth: 1,
-        height: 40,
+        // height: 40,
         marginTop: 10,
         marginBottom: 10,
         borderWidth: 1,
         padding: 10,
-        borderRadius: 5
+        borderRadius: 5,
+        borderColor: Theme.light.borderColorDark
     },
+    content: {
+        fontSize: 16
+    },
+    contentHeading: {
+        fontWeight: 'bold',
+        fontSize: 18
+
+    }
 
 });

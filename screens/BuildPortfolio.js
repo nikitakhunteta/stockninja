@@ -61,39 +61,48 @@ export default BuildPortfolio = ({ navigation, route }) => {
     const HeaderComponent = ({ item }) => {
         return <View>
             <View style={[{
-                flexDirection: 'column', TouchableOpacity
+                flexDirection: 'column',
+                TouchableOpacity
             }]} >
                 <Text style={[styles.content,
-                { backgroundColor: theme.backgroundColor }]}>{item.name}</Text>
+                ]}>{item.name}</Text>
                 <Text style={[styles.content, {
                 }]}>{item.name}</Text>
             </View></View>
     }
 
     const ExpandedBodyComponent = ({ item }) => {
-        return (
-            <View style={[{ flexDirection: 'column' }]} >
-                <View style={[{ flexDirection: 'row' }]} >
-                    <Text>Price</Text>
-                    <Text style={[{
-                        flexGrow: 1,
-                        textAlign: 'right'
-                    }]}>{item.price}</Text>
-                </View>
-                <View style={[{ flexDirection: 'row' }]} >
-                    <Button onPress={() =>
-                        navigation.navigate('PlaceOrder', {
-                            ...item,
-                            portfolio: { ...userContext?.selectedPortfolio },
-                            leagueJoinedId,
-                            leagueId
-                        })} title="Buy"></Button>
-                    <Text style={[{
-                        flexGrow: 1,
-                        textAlign: 'right'
-                    }]}>{item.entryFee}</Text>
-                </View>
-            </View>)
+        return (<View style={[{
+            flexDirection: 'column',
+            backgroundColor: '#C4DFDF',
+            borderStyle: 'solid',
+            borderTopWidth: 0.5,
+            borderColor: Theme.light.primary,
+
+        }]} >
+            <View style={[{ flexDirection: 'row', padding: 10, justifyContent: 'space-between' }]} >
+                <Text>Price</Text>
+                <Text style={[{
+
+                }]}>{item.price}</Text>
+            </View>
+
+            <Button
+                style={{
+                    width: '100%'
+                }}
+                color={Theme.light.primary}
+                onPress={() =>
+                    navigation.navigate('PlaceOrder', {
+                        ...item,
+                        portfolio: { ...userContext?.selectedPortfolio },
+                        leagueJoinedId,
+                        leagueId
+                    })} title="Buy"></Button>
+
+
+        </View>
+        )
     }
 
     const searchFilterFunction = async (text) => {
@@ -120,19 +129,30 @@ export default BuildPortfolio = ({ navigation, route }) => {
     }
 
     const Item = ({ item }) => (
-        <View style={styles.item}>
-            <Text style={styles.title}>{item.ticker}: </Text>
-            <Text style={styles.title}>{item.quantity}: </Text>
-            <Text style={styles.title}>{item.price}</Text>
+        <View style={[styles.item]}>
+            <Text style={styles.content}>{item.ticker} </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text>Quantity: </Text>
+                    <Text>{item.quantity}</Text>
+                </View>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text>Price: </Text>
+                    <Text>{item.price}</Text></View>
+            </View>
         </View>
     );
+
 
     return (
 
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ flex: 1, width: '100%', }}>
-                <Text>Coins remaining: {userContext?.selectedPortfolio?.coinsAvailable}</Text>
-                <Text> {portfolioStocks.length ? 30 - distinctStocks : 30} stocks remaining out of {30}</Text>
+
+                <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: 16 }}>Coins: {userContext?.selectedPortfolio?.coinsAvailable}</Text>
+                    <Text style={{ fontSize: 16 }}> {portfolioStocks.length ? 30 - distinctStocks : 30} stocks remaining out of {30}</Text>
+                </View>
                 <SearchBar
                     placeholder="Search Stock..."
                     searchIcon={null}
@@ -169,22 +189,23 @@ const styles = StyleSheet.create({
 
     header: {
         padding: 10,
-        fontWeight: 'bold'
-        // backgroundColor: themeColor.backgroundColor
+        fontWeight: 'bold',
+        fontSize: 16
     },
-
     item: {
+        shadowColor: Theme.light.tertiary,
+        shadowOffset: { width: -2, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        backgroundColor: Theme.light.fill,
+        fontSize: 15,
+        fontWeight: 'bold',
+        elevation: 20,
         padding: 10,
-        // marginVertical: 8,
-        // marginHorizontal: 16,
-        flexDirection: 'row',
-        // justifyContent: 'center',
-        // flexGrow: 1,
-        // alignSelf: 'stretch',
-        // alignItems:'stretch',
-        // display: 'flex'
+        // height: 50, 
+        margin: 5
     },
     title: {
-        fontSize: 12,
+        fontSize: 16,
     },
 });
