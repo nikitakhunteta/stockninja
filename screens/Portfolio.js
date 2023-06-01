@@ -3,7 +3,8 @@ import React, { useEffect, useState, useContext } from 'react';
 import {
     View, Text, Button,
     TextInput, StyleSheet, TouchableOpacity,
-    ActivityIndicator, FlatList, Alert
+    ActivityIndicator, FlatList, Alert, Pressable,
+    Modal
 } from "react-native"
 import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
@@ -21,6 +22,7 @@ export default Portfolio = ({ navigation, route }) => {
     const [loading, setLoading] = useState(false);
     const [checked, setChecked] = React.useState('');
     const [selectedPortfolio, setSelectedPortfolio] = React.useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
     const userContext = useContext(Context);
 
     //TODO: optmiize this with local state of data
@@ -113,9 +115,9 @@ export default Portfolio = ({ navigation, route }) => {
     const joinLeague = async () => {
         //check the amount in wallet of user 
         const walletAmount = userContext.wallet?.amount;
-        console.log('walletAmount', walletAmount)
         if (league?.entryFee > walletAmount) {
-            Alert.alert('Insufficient balance');
+            setModalVisible(true)
+            // Alert.alert('Insufficient balance');
             return;
         }
         try {
@@ -196,11 +198,42 @@ export default Portfolio = ({ navigation, route }) => {
             </TouchableOpacity>
         )
     };
+    const redirectToAddMoney = () => {
+        setModalVisible(!modalVisible);
+        navigation.navigate('AddMoney')
+    }
 
     return <View style={[styles.screen]} >
         {loading && <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <ActivityIndicator />
         </View>}
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+                setModalVisible(!modalVisible);
+            }}>
+            <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                    <Text style={styles.modalText}>Insufficient balance!! Please add money to proceed.</Text>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Pressable
+                            style={[styles.button, styles.buttonClose]}
+                            onPress={() => redirectToAddMoney()}>
+                            <Text style={styles.textStyle}>Add Money</Text>
+                        </Pressable>
+
+                        <Pressable
+                            style={[styles.button, styles.buttonClose]}
+                            onPress={() => setModalVisible(!modalVisible)}>
+                            <Text style={styles.textStyle}>Cancel</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+        <Text>{userContext?.wallet.amount}</Text>
         <FlatList
             data={portfolios}
             renderItem={({ item }) => <Item item={item} />}
@@ -249,5 +282,42 @@ const styles = StyleSheet.create({
         alignItems: 'center', margin: 10
     }, label: {
         margin: 8,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+        backgroundColor: 'white',
+        // opacity: 0.8
+    },
+    modalView: {
+        margin: 20,
+        // backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+
+    },
+    button: {
+        borderRadius: 5,
+        padding: 10,
+        margin: 5
+    },
+    buttonOpen: {
+        backgroundColor: Theme.light.primary,
+    },
+    buttonClose: {
+        backgroundColor: Theme.light.primary,
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
+        fontSize: 15
     },
 });

@@ -131,7 +131,8 @@ export default function Authenticated({ navigation, route }) {
       {!item.hasUserJoined &&
 
         <View style={{ marginTop: 10 }}>
-          <Button color={Theme.light.primary} title="Participate" disabled={item.hasStarted || item.freeSlots === 0} onPress={() => participateInContest(item)} />
+          <Button color={Theme.light.primary} title="Participate" disabled={item.hasStarted || item.freeSlots === 0} 
+          onPress={() => participateInContest(item)} />
         </View>
       }
       {item.hasUserJoined &&

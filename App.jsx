@@ -4,6 +4,7 @@ import PhoneNumber from './screens/PhoneNumber';
 import VerifyCode from './screens/VerifyCode';
 import Portfolio from './screens/Portfolio';
 import BuildPortfolio from './screens/BuildPortfolio';
+import AddMoney from './screens/AddMoney';
 import PlaceOrder from './screens/PlaceOrder';
 import ContestParticipate from './screens/ViewContestPortfolio';
 import Authenticated from './screens/Authenticated';
@@ -85,6 +86,9 @@ export default function App() {
             options={({ route }) => ({ title: `Portfolio ${route?.params?.name}`, ...headerStyle })} />
           <Stack.Screen name="PlaceOrder" component={PlaceOrder} initialParams={{ uid }}
             options={{ title: 'Place Order', ...headerStyle }}
+          />
+           <Stack.Screen name="AddMoney" component={AddMoney} initialParams={{ uid }}
+            options={{ title: 'Add Money', ...headerStyle }}
           />
           <Stack.Screen name="ViewContestPortfolio" component={ViewContestPortfolio}
             initialParams={{ uid }} options={({ route }) => ({ title: `Contest Details`, ...headerStyle })} />

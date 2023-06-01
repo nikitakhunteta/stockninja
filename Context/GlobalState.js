@@ -4,8 +4,8 @@ import firestore from '@react-native-firebase/firestore';
 import Context from './context';
 export default GlobalState = (props) => {
     const [wallet, setWallet] = useState({
-        amount:0,
-        id:''
+        amount: 0,
+        id: ''
     });
     const [selectedPortfolio, setSelectedPortfolio] = useState(null);
 
@@ -14,11 +14,24 @@ export default GlobalState = (props) => {
             .collection('wallet')
             .doc(wallet.id)
             .update({
-                amount: wallet.amount-amount
+                amount: wallet.amount - amount
             });
         setWallet({
             ...wallet,
-            amount:  wallet.amount-amount
+            amount: wallet.amount - amount
+        });
+    };
+    const addWalletAmount = async (amount) => {
+        let newAmt = Number(wallet.amount) + Number(amount)
+        await firestore()
+            .collection('wallet')
+            .doc(wallet.id)
+            .update({
+                amount: newAmt
+            });
+        setWallet({
+            ...wallet,
+            amount: newAmt
         });
     };
 
@@ -54,7 +67,9 @@ export default GlobalState = (props) => {
                 deductWalletAmount: deductWalletAmount,
                 updateSelectedPortfolio,
                 selectedPortfolio,
-                updateSelectedPortfolioData
+                updateSelectedPortfolioData, 
+                addWalletAmount
+
             }}
         >
             {props.children}

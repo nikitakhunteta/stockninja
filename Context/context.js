@@ -8,4 +8,5 @@ export default React.createContext({
   updateSelectedPortfolio: (portfolio) => { },
   selectedPortfolio: null,
   updateSelectedPortfolioData: (portfolioData) => { },
+  addWalletAmount: (amount) => { },
 });
