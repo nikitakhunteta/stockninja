@@ -3,7 +3,9 @@ const frontColor = '#47A992';
 
 export const Theme = {
     light: {
+        button:frontColor,
         primary: frontColor,
+        color:'black',
         secondary: frontColor,
         borderColorDark: frontColor,
         backgroundColor: backColor,

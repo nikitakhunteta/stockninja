@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import CustomButton from '../components/CustomButton';
 
 export default function OTP(props) {
   const [code, setCode] = useState('');
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.text}>Enter OTP</Text>
+      <Text style={styles.text}>Verify OTP</Text>
+      <Text style={styles.subText}>Please enter OTP received...</Text>
+
       <TextInput
         autoFocus
         value={code}
@@ -29,12 +32,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'lightblue',
     width: 300,
-    marginVertical: 30,
-    fontSize: 25,
+    marginVertical: 15,
+    fontSize: 20,
     padding: 10,
     borderRadius: 8,
   },
   text: {
-    fontSize: 25,
+    fontSize: 20,
+    fontWeight: 'bold'
+  },
+  subText: {
+    marginTop: 5,
+    fontSize: 18,
   },
 });

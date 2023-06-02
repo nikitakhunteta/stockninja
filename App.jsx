@@ -22,6 +22,7 @@ export default function App() {
 
   async function signIn(phoneNumber) {
     try {
+      console.log('phoneNumber',phoneNumber)
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
       setConfirm(confirmation);
     } catch (error) {
@@ -68,30 +69,29 @@ export default function App() {
   return (
     <NavigationContainer theme={navTheme}>
       <GlobalState uid={uid}>
-        {uid && authenticated ? <Stack.Navigator >
+        {uid && authenticated ? <Stack.Navigator screenOptions={{...headerStyle}}>
           <Stack.Screen
             name="Home"
             component={Authenticated}
             initialParams={{ uid }}
             options={{
               title: 'Stock Ninja',
-              ...headerStyle
             }
             }
           />
           <Stack.Screen name="Portfolio" options={{
-            title: 'Portfolios', ...headerStyle
+            title: 'Portfolios'
           }} component={Portfolio} initialParams={{ uid }} />
           <Stack.Screen name="BuildPortfolio" component={BuildPortfolio} initialParams={{ uid }}
-            options={({ route }) => ({ title: `Portfolio ${route?.params?.name}`, ...headerStyle })} />
+            options={({ route }) => ({ title: `Portfolio ${route?.params?.name}` })} />
           <Stack.Screen name="PlaceOrder" component={PlaceOrder} initialParams={{ uid }}
-            options={{ title: 'Place Order', ...headerStyle }}
+            options={{ title: 'Place Order' }}
           />
            <Stack.Screen name="AddMoney" component={AddMoney} initialParams={{ uid }}
-            options={{ title: 'Add Money', ...headerStyle }}
+            options={{ title: 'Add Money' }}
           />
           <Stack.Screen name="ViewContestPortfolio" component={ViewContestPortfolio}
-            initialParams={{ uid }} options={({ route }) => ({ title: `Contest Details`, ...headerStyle })} />
+            initialParams={{ uid }} options={({ route }) => ({ title: `Contest Details` })} />
 
         </Stack.Navigator> :
           (confirm ? <VerifyCode onSubmit={confirmVerificationCode} /> :

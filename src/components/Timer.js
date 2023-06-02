@@ -38,7 +38,7 @@ const ShowCounter = ({ days, hours, minutes, seconds }) => {
 const ExpiredNotice = () => {
     return (
         <View>
-            <Text>Please select a future date and time.</Text>
+            <Text>League Ended!</Text>
         </View>
     );
 };

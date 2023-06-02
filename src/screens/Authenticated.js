@@ -21,10 +21,9 @@ export default function Authenticated({ navigation, route }) {
 
   const dateInPast = (firstDate, secondDate) => {
     if (firstDate <= secondDate.getTime()) {
-      return false;
+      return true;
     }
-
-    return true;
+    return false;
   };
 
   useEffect(() => {
@@ -42,18 +41,20 @@ export default function Authenticated({ navigation, route }) {
           const leaguesJoined = await firestore().collection('leaguesJoined').where('userId', '==', uid).get();
           let leagueDocMapping = {};
           let leaguesJoinedIds = leaguesJoined?._docs?.map(x => {
-            leagueDocMapping[x._data.leagueId] = {
+            leagueDocMapping[x._data?.leagueId] = {
               leagueJoinedId: x._ref._documentPath._parts[1],
-              portfolioId: x._data.portfolioId,
+              portfolioId: x._data?.portfolioId,
             }
-            return x._data.leagueId
+            return x._data?.leagueId
           });
 
           let data = leagues?._docs.map(v => {
             let leagueId = v._ref._documentPath._parts[1];
             return ({
               ...v._data,
-              hasStarted: dateInPast(v?._data?.startDateTime, currentDate),
+              isOver: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
+              isOngoing: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
+              hasStarted: dateInPast(v?._data?.startDateTime?.seconds * 1000, currentDate),
               leagueId,
               hasUserJoined: leaguesJoinedIds?.includes(leagueId),
               leagueJoinedId: leagueDocMapping[leagueId]?.leagueJoinedId,
@@ -66,6 +67,7 @@ export default function Authenticated({ navigation, route }) {
         }
         getData()
       } catch (e) {
+        console.log('here')
         setLoading(false);
       }
     });
@@ -81,9 +83,9 @@ export default function Authenticated({ navigation, route }) {
       }]} >
         <Text style={[styles.content,
         {
-        }]}>Total Slots</Text>
+        }]}>Free Slots/Total</Text>
         <Text style={[styles.content, {
-        }]}>{item.totalSlots} {item.freeSlots}</Text>
+        }]}>{item.freeSlots}/{item.totalSlots} </Text>
       </View></View>
   }
   const participateInContest = (item) => {
@@ -112,13 +114,13 @@ export default function Authenticated({ navigation, route }) {
     return <View style={[{
       flexDirection: 'column',
       borderStyle: 'solid',
-      borderColor: theme?.borderColorDark,
+      borderColor: theme?.primary,
       borderTopWidth: 1,
       backgroundColor: '#C4DFDF'
     }]} >
       <View style={styles.cardInnerContent} >
         <Text>Entry Fee</Text>
-        <Text>Rs.{item.entryFee}</Text>
+        <Text>Rs.{item.entryFee} {item.hasUserJoined.toString()}</Text>
       </View>
       <View style={styles.cardInnerContent} >
         <Text>Starts In</Text>
@@ -130,14 +132,14 @@ export default function Authenticated({ navigation, route }) {
       </View>
       {!item.hasUserJoined &&
 
-        <View style={{ marginTop: 10 }}>
-          <Button color={Theme.light.primary} title="Participate" disabled={item.hasStarted || item.freeSlots === 0} 
+      <View style={{ marginTop: 10 }}>
+        <Button color={Theme.light.button} title="Participate" disabled={item.hasStarted || item.freeSlots === 0}
           onPress={() => participateInContest(item)} />
-        </View>
+      </View>
       }
       {item.hasUserJoined &&
         <View style={{ marginTop: 10 }}>
-          <Button color={Theme.light.primary} title="View" onPress={() => viewContestPortfolio(item)} />
+          <Button color={Theme.light.button} title="View" onPress={() => viewContestPortfolio(item)} />
         </View>
       }
     </View>

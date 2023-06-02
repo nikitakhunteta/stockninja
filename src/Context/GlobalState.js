@@ -45,11 +45,12 @@ export default GlobalState = (props) => {
 
     useEffect(() => {
         try {
+            console.log('pros', props.uid)
             async function getData() {
                 if (props.uid) {
                     const userWallet = await firestore().collection('wallet').where('userId', '==', props.uid).get();
                     setWallet({
-                        amount: userWallet._docs[0]._data.amount,
+                        amount: userWallet._docs[0]?._data.amount || 100,
                         id: userWallet._docs[0]?._ref?._documentPath?._parts[1]
                     });
                 }
