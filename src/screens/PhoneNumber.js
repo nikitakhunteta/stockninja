@@ -26,7 +26,7 @@ export default function PhoneNumber(props) {
           value={phoneNumber}
           onChangeText={setPhoneNumber}
         /></View>
-      <Button title="Sign In" loading={props.loading} onPress={() => props.onSubmit(phoneNumberValue)} />
+      <Button title="Sign In" onPress={() => props.onSubmit(phoneNumberValue)} />
     </View>
   );
 }

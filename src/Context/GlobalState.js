@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import firestore from '@react-native-firebase/firestore';
 
 import Context from './context';
+import { INITIAL_WALLET } from '../../constants';
 export default GlobalState = (props) => {
     const [wallet, setWallet] = useState({
         amount: 0,
@@ -45,12 +46,11 @@ export default GlobalState = (props) => {
 
     useEffect(() => {
         try {
-            console.log('pros', props.uid)
             async function getData() {
-                if (props.uid) {
-                    const userWallet = await firestore().collection('wallet').where('userId', '==', props.uid).get();
+                if (props?.uid) {
+                    const userWallet = await firestore().collection('wallet').where('userId', '==', props?.uid).get();
                     setWallet({
-                        amount: userWallet._docs[0]?._data.amount || 100,
+                        amount: userWallet._docs[0]?._data.amount || INITIAL_WALLET,
                         id: userWallet._docs[0]?._ref?._documentPath?._parts[1]
                     });
                 }

@@ -4,6 +4,8 @@ import {
   TouchableOpacity, ActivityIndicator
 
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import ExpandableCard from '../components/ExpandableCard';
@@ -26,53 +28,77 @@ export default function Authenticated({ navigation, route }) {
     return false;
   };
 
-  useEffect(() => {
 
-  }, [route.params?.leagueJoinedId]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const intervalCall = setInterval(() => {
+        getData();
+      }, 30000);
+      return () => {
+        // clean up
+        clearInterval(intervalCall);
+      };
+    }, [])
+  );
+
+
+  const getData = async () => {
+    try {
+      const leaguesData = await firestore().collection('leagues').get();
+      const leaguesJoined = await firestore().collection('leaguesJoined').where('userId', '==', uid).get();
+      massageData(leaguesData, leaguesJoined);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       setLoading(true);
-      let currentDate = new Date();
       try {
         async function getData() {
           // ToDO: to get those which are active or will start in 24hrs
-          const leagues = await firestore().collection('leagues').get();
+          const leaguesData = await firestore().collection('leagues').get();
           const leaguesJoined = await firestore().collection('leaguesJoined').where('userId', '==', uid).get();
-          let leagueDocMapping = {};
-          let leaguesJoinedIds = leaguesJoined?._docs?.map(x => {
-            leagueDocMapping[x._data?.leagueId] = {
-              leagueJoinedId: x._ref._documentPath._parts[1],
-              portfolioId: x._data?.portfolioId,
-            }
-            return x._data?.leagueId
-          });
-
-          let data = leagues?._docs.map(v => {
-            let leagueId = v._ref._documentPath._parts[1];
-            return ({
-              ...v._data,
-              isOver: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
-              isOngoing: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
-              hasStarted: dateInPast(v?._data?.startDateTime?.seconds * 1000, currentDate),
-              leagueId,
-              hasUserJoined: leaguesJoinedIds?.includes(leagueId),
-              leagueJoinedId: leagueDocMapping[leagueId]?.leagueJoinedId,
-              portfolioId: leagueDocMapping[leagueId]?.portfolioId,
-            })
-          });
-
-          setLeagues(data);
+          massageData(leaguesData, leaguesJoined);
           setLoading(false);
         }
-        getData()
+        getData();
+
       } catch (e) {
-        console.log('here')
         setLoading(false);
       }
     });
     return unsubscribe;
   }, [navigation]);
+
+  const massageData = (leaguesData, leaguesJoined) => {
+    let currentDate = new Date();
+
+    let leagueDocMapping = {};
+    let leaguesJoinedIds = leaguesJoined?._docs?.map(x => {
+      leagueDocMapping[x._data?.leagueId] = {
+        leagueJoinedId: x._ref._documentPath._parts[1],
+        portfolioId: x._data?.portfolioId,
+      }
+      return x._data?.leagueId
+    });
+
+    let data = leaguesData?._docs.map(v => {
+      let leagueId = v._ref._documentPath._parts[1];
+      return ({
+        ...v._data,
+        isOver: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
+        isOngoing: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
+        hasStarted: dateInPast(v?._data?.startDateTime?.seconds * 1000, currentDate),
+        leagueId,
+        hasUserJoined: leaguesJoinedIds?.includes(leagueId),
+        leagueJoinedId: leagueDocMapping[leagueId]?.leagueJoinedId,
+        portfolioId: leagueDocMapping[leagueId]?.portfolioId,
+      })
+    });
+    setLeagues(data);
+  }
 
   const HeaderComponent = ({ item }) => {
     return <View>
@@ -132,10 +158,10 @@ export default function Authenticated({ navigation, route }) {
       </View>
       {!item.hasUserJoined &&
 
-      <View style={{ marginTop: 10 }}>
-        <Button color={Theme.light.button} title="Participate" disabled={item.hasStarted || item.freeSlots === 0}
-          onPress={() => participateInContest(item)} />
-      </View>
+        <View style={{ marginTop: 10 }}>
+          <Button color={Theme.light.button} title="Participate" disabled={item.hasStarted || item.freeSlots === 0}
+            onPress={() => participateInContest(item)} />
+        </View>
       }
       {item.hasUserJoined &&
         <View style={{ marginTop: 10 }}>

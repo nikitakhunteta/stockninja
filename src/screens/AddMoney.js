@@ -54,8 +54,6 @@ export default AddMoney = ({ navigation }) => {
                 onPress={() => { navigation.goBack() }}>
                 <Text style={styles.textStyle}>Cancel</Text>
             </Pressable>
-            {/* <Button color={Theme.light.primary}  title='Add' onPress={}></Button>
-        <Button color={Theme.light.tertiary} title='Cancel' onPress={ }}></Button> */}
         </View></View>
 }
 const styles = StyleSheet.create({

@@ -168,11 +168,7 @@ export default Portfolio = ({ navigation, route }) => {
                     borderStyle: 'solid'
                 }}
                 key={item._data.name}>
-                    <CheckBox
-                        // style={styles.checkbox}
-                        color={checked === item?._ref?._documentPath?._parts[1] ? 'red' : undefined}
-
-                        checked={checked === item?._ref?._documentPath?._parts[1]}
+                    <Pressable style={{marginLeft: 10}}
                         onPress={() => {
                             let id = item?._ref?._documentPath?._parts[1]
                             setChecked(id);
@@ -186,14 +182,28 @@ export default Portfolio = ({ navigation, route }) => {
                                 //TODO: show error and disable the join button
                                 // show add money button 
                             }
-                        }}
-                        center
-                        iconRight
-                        iconType='material'
-                        checkedIcon='clear'
-                        uncheckedIcon='add'
-                        checkedColor='black'
-                    />
+                        }}>
+                        <View style={[{
+                            height: 16,
+                            width: 16,
+                            borderRadius: 8,
+                            borderWidth: 2,
+                            borderColor: Theme.light.primary,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }]}>
+                            {
+                                checked === item?._ref?._documentPath?._parts[1] ?
+                                    <View style={{
+                                        height: 8,
+                                        width: 8,
+                                        borderRadius: 4,
+                                        backgroundColor: Theme.light.primary,
+                                    }} />
+                                    : null
+                            }
+                        </View>
+                    </Pressable>
                     <Text style={[styles.label, {}]}>{item._data.name}</Text></View>
             </TouchableOpacity>
         )
@@ -238,6 +248,7 @@ export default Portfolio = ({ navigation, route }) => {
             data={portfolios}
             renderItem={({ item }) => <Item item={item} />}
             keyExtractor={item => item.id}
+            ListEmptyComponent={<Text style={{ fontSize: 18, margin: 10 }}>You have not created any portfolio yet! Let's get you started!!</Text>}
         />
         {portfolios?.length > 0 && <View style={styles.buttonContainer}>
             <Button color={Theme.light.primary}
@@ -253,21 +264,35 @@ export default Portfolio = ({ navigation, route }) => {
 
         {addPortfolio && <View style={{ alignItems: 'center' }} >
             <TextInput style={styles.input} onChangeText={onChangePortfolioName} placeholder='Portfolio Name'></TextInput>
-            <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-evenly' }}>
-                <Button color={Theme.light.primary} title='save' onPress={savePortfolio}></Button>
-                <Button color={Theme.light.primary} title='Cancel' onPress={() => { setAddPortfolio(false) }}></Button>
-            </View></View>}
+
+            <View style={{ flexDirection: 'row', margin: 25, marginTop: 5, justifyContent: 'center' }}>
+
+                <Pressable
+                    style={[styles.button, styles.buttonClose, { flex: 1 }]}
+                    onPress={savePortfolio}>
+                    <Text style={styles.textStyle}>Save</Text>
+                </Pressable>
+
+                <Pressable
+                    style={[styles.button, styles.buttonClose, { flex: 1, backgroundColor: Theme.light.tertiary }]}
+                    onPress={() => { setAddPortfolio(false) }}>
+                    <Text style={styles.textStyle}>Cancel</Text>
+                </Pressable>
+            </View>
+        </View>}
     </View>
 }
 
 const styles = StyleSheet.create({
     input: {
-        // height: 40,
-        // borderColor: 'gray',
-        borderWidth: 1,
+        borderWidth: 2,
         margin: 20,
         borderColor: Theme.light.borderColorDark,
-        width: '80%'
+        width: '80%',
+        marginVertical: 15,
+        fontSize: 15,
+        padding: 10,
+        borderRadius: 8,
     },
     screen: {
         width: '100%'
