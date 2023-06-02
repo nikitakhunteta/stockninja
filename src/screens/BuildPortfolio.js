@@ -2,9 +2,9 @@ import React, { useEffect, useState, useContext } from 'react';
 import {
     View, Text, TouchableOpacity, ActivityIndicator,
     useColorScheme, Button, FlatList, StyleSheet,
-    ScrollView
-} from "react-native"
-import { } from 'react-native';
+    ScrollView, useWindowDimensions
+} from 'react-native';
+import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 import { SearchBar } from 'react-native-elements';
 import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
@@ -12,8 +12,14 @@ import { Theme } from '../../theme';
 import ExpandableCard from '../components/ExpandableCard';
 
 
-export default BuildPortfolio = ({ navigation, route }) => {
+export default function BuildPortfolio({ navigation, route }) {
     const { name, leagueId, leagueJoinedId, portfolioId, uid, ...rest } = route.params;
+    const layout = useWindowDimensions();
+    const [index, setIndex] = React.useState(0);
+    const [routes] = React.useState([
+        { key: 'stocks', title: 'Stocks' },
+        { key: 'orders', title: 'Orders' },
+    ]);
 
     const userContext = useContext(Context);
     const colorTheme = useColorScheme();
@@ -26,6 +32,49 @@ export default BuildPortfolio = ({ navigation, route }) => {
     const [filterValue, setFilterValue] = useState('');
     const [distinctStocks, setDistinctStocks] = useState(0);
 
+    const StocksRoute = () => {
+        if (loading) {
+            return (
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <ActivityIndicator />
+                </View>
+            );
+        }
+        return (
+            <View style={{ flex: 1, width: '100%', }}>
+
+                <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: 16 }}>Coins: {userContext?.selectedPortfolio?.coinsAvailable}</Text>
+                    <Text style={{ fontSize: 16 }}> {portfolioStocks.length ? 30 - distinctStocks : 30} stocks remaining out of {30}</Text>
+                </View>
+                <SearchBar
+                    placeholder="Search Stock..."
+                    searchIcon={null}
+                    lightTheme
+                    round
+                    onChangeText={text => searchFilterFunction(text)}
+                    autoCorrect={false}
+                    value={filterValue}
+                />
+                <ExpandableCard data={masterStocks} dataKeyExtractor={filterValue ? null : '_data'}
+                    HeaderComponent={HeaderComponent}
+                    ExpandedBodyComponent={ExpandedBodyComponent}>
+                </ExpandableCard>
+
+            </View>
+        );
+    }
+    const OrdersRoute = () => (
+        <View style={{ flex: 1, width: '100%' }}>
+            <Text style={styles.header}>Current Orders</Text>
+            <FlatList
+                data={portfolioStocks}
+                renderItem={({ item }) => <Item item={item._data} />}
+                keyExtractor={item => item.id}
+                ListEmptyComponent={<Text>No orders yet!</Text>}
+            />
+        </View>
+    );
     useEffect(() => {
         setLoading(true);
         async function getStocksData() {
@@ -119,15 +168,6 @@ export default BuildPortfolio = ({ navigation, route }) => {
             setMasterStocks(masterStocksData);
         }
     };
-
-    if (loading) {
-        return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                <ActivityIndicator />
-            </View>
-        );
-    }
-
     const Item = ({ item }) => (
         <View style={[styles.item]}>
             <Text style={styles.content}>{item.ticker} </Text>
@@ -143,41 +183,29 @@ export default BuildPortfolio = ({ navigation, route }) => {
         </View>
     );
 
+    const renderScene = SceneMap({
+        stocks: StocksRoute,
+        orders: OrdersRoute,
+    });
+    const renderTabBar = props => (
+        <TabBar
+            {...props}
+            indicatorStyle={{ backgroundColor: 'black' }}
+            activeColor={'black'}
+            inactiveColor={'black'}
+            pressColor={'white'}
+            style={{ backgroundColor: 'white' }}
+        />
+    );
 
     return (
-
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ flex: 1, width: '100%', }}>
-
-                <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: 16 }}>Coins: {userContext?.selectedPortfolio?.coinsAvailable}</Text>
-                    <Text style={{ fontSize: 16 }}> {portfolioStocks.length ? 30 - distinctStocks : 30} stocks remaining out of {30}</Text>
-                </View>
-                <SearchBar
-                    placeholder="Search Stock..."
-                    searchIcon={null}
-                    lightTheme
-                    round
-                    onChangeText={text => searchFilterFunction(text)}
-                    autoCorrect={false}
-                    value={filterValue}
-                />
-                <ExpandableCard data={masterStocks} dataKeyExtractor={filterValue ? null : '_data'}
-                    HeaderComponent={HeaderComponent}
-                    ExpandedBodyComponent={ExpandedBodyComponent}>
-                </ExpandableCard>
-
-            </View>
-            <View style={{ flex: 1, width: '100%' }}>
-                <Text style={styles.header}>Current Orders</Text>
-                <FlatList
-                    data={portfolioStocks}
-                    renderItem={({ item }) => <Item item={item._data} />}
-                    keyExtractor={item => item.id}
-                    ListEmptyComponent={<Text>No orders yet!</Text>}
-                />
-            </View>
-        </View>
+        <TabView
+            navigationState={{ index, routes }}
+            renderScene={renderScene}
+            renderTabBar={renderTabBar}
+            onIndexChange={setIndex}
+            initialLayout={{ width: layout.width }}
+        />
     );
 }
 
