@@ -1,37 +1,66 @@
 import React, { useEffect, useState, useContext } from 'react';
 
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native"
+import { View, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native"
 import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
 import { Theme } from '../../theme';
 
+const dateInPast = (firstDate, secondDate = new Date()) => {
+    if (firstDate <= secondDate.getTime()) {
+        return true;
+    }
+    return false;
+};
 export default ViewContestPortfolio = ({ navigation, route }) => {
 
-    const { uid, leagueId, leagueJoinedId, portfolioId } = route.params;
+    const { uid, league } = route.params;
     const [portfolio, setPortfolio] = useState();
+    const [winnerInfo, setWinnerInfo] = useState();
     const [loading, setLoading] = useState(false);
     const userContext = useContext(Context);
 
     useEffect(() => {
-        setLoading(true)
+        setLoading(true);
+
         async function getData() {
             try {
                 const portfolioDoc = await firestore().collection('portfolios')
-                    .where('userId', '==', uid).where(firestore.FieldPath.documentId(), '==', portfolioId)
+                    .where('userId', '==', uid).where(firestore.FieldPath.documentId(), '==', league?.portfolioId)
                     .get();
                 setPortfolio(portfolioDoc?._docs?.[0]);
+                const winnersInfo = await firestore().collection('winners')
+                    .where('leagueId', '==', league?.leagueId)
+                    .get();
+                setWinnerInfo(winnersInfo?._docs)
             } catch (e) {
 
             }
             setLoading(false)
         }
         getData();
-    }, [portfolioId]);
+    }, [league?.portfolioId]);
 
+    const Item = ({ item }) => (
+        <View style={[styles.cardStyle]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
+                <View style={{ flexDirection: 'row' }}>
+                    <Text>{item._data.rank}</Text></View>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text>{item._data.userId}</Text>
+                </View>
+            </View>
+        </View>
+    );
     const getPortfolioDetails = (name, portfolioId) => {
-        userContext?.updateSelectedPortfolio({ name, portfolioId, leagueJoinedId, leagueId, ...portfolio._data });
-        navigation.navigate('BuildPortfolio', { name, portfolioId, leagueJoinedId, leagueId });
+        userContext?.updateSelectedPortfolio({
+            name, portfolioId, leagueJoinedId: league?.leagueJoinedId,
+            leagueId: league?.leagueId, ...portfolio._data
+        });
+        navigation.navigate('BuildPortfolio', {
+            name, portfolioId, leagueJoinedId: league?.leagueJoinedId,
+            leagueId: league?.leagueId
+        });
     }
 
     if (loading) {
@@ -41,7 +70,7 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
             </View>
         );
     }
-    return <View style={[styles.screen]} ><Text style={styles.subHeader}>League Portfolio</Text>
+    return <View style={[styles.screen]} ><Text style={styles.subHeader}>Portfolio</Text>
         <TouchableOpacity
             activeOpacity={1}
             onPress={() => getPortfolioDetails(portfolio?._data?.name, portfolio?._ref?._documentPath?._parts[1])}
@@ -59,9 +88,15 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
                 </View>
             </View>
         </TouchableOpacity>
-        <View style={{ marginTop: 10 }}>
-            <Text style={[styles.subHeader]}> Contest Details</Text>
-            <Text> if ended, show user rank and top 10 rankers</Text>
+        {dateInPast(league.endDateTime * 1000) && <View style={{ marginTop: 10 }}>
+            <Text style={[styles.subHeader]}>Winners</Text>
+            <FlatList data={winnerInfo} renderItem={({ item }) => <Item item={item} />}
+            />
+        </View>}
+       <View style={{ marginTop: 10 }}>
+            <Text style={[styles.subHeader]}>Prize Pool</Text>
+            <FlatList data={winnerInfo} renderItem={({ item }) => <Item item={item} />}
+            />
         </View>
     </View>
 }
@@ -90,7 +125,16 @@ const styles = StyleSheet.create({
     subHeader: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 10
+        marginBottom: 5,
+        // margintTop: 10
     },
+    cardStyle: {
+        backgroundColor: "white",
+        borderRadius: 10,
+        // width: Dimensions.get("window").width / 2.6,
+        // height: Dimensions.get("window").width / 2.6,
+        padding: 10,
+        margin: 10,
+    }
 
 });

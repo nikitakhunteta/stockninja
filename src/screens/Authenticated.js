@@ -17,6 +17,7 @@ export default function Authenticated({ navigation, route }) {
   const { leagueId, portfolioId, uid } = route.params;
 
   const [leagues, setLeagues] = useState([]);
+  const [prizePool, setPrizePool] = useState({});
   const colorTheme = useColorScheme();
   const theme = Theme[colorTheme];
   const [loading, setLoading] = useState(false);
@@ -83,9 +84,27 @@ export default function Authenticated({ navigation, route }) {
       }
       return x._data?.leagueId
     });
+    let prizePoolMapping = {};
 
     let data = leaguesData?._docs.map(v => {
       let leagueId = v._ref._documentPath._parts[1];
+      prizePoolMapping[leagueId] = {
+        rankingInfo: [
+          {
+            rank: 1, prize: 500
+          },
+          {
+            rank: 2, prize: 400
+          }, {
+            rank: 3, prize: 300
+          }, {
+            rank: 4, prize: 200
+          }, {
+            rank: 5, prize: 100
+          },
+        ]
+
+      }
       return ({
         ...v._data,
         isOver: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
@@ -98,6 +117,7 @@ export default function Authenticated({ navigation, route }) {
       })
     });
     setLeagues(data);
+    setPrizePool(prizePoolMapping);
   }
 
   const HeaderComponent = ({ item }) => {
@@ -129,11 +149,7 @@ export default function Authenticated({ navigation, route }) {
     // select the portfolio to be used 
   }
   const viewContestPortfolio = (item) => {
-    navigation.navigate('ViewContestPortfolio', {
-      leagueId: item.leagueId,
-      leagueJoinedId: item.leagueJoinedId,
-      portfolioId: item.portfolioId
-    })
+    navigation.navigate('ViewContestPortfolio', { league: item })
   }
   const ExpandedBodyComponent = ({ item }) => {
 
@@ -146,16 +162,41 @@ export default function Authenticated({ navigation, route }) {
     }]} >
       <View style={styles.cardInnerContent} >
         <Text>Entry Fee</Text>
-        <Text>Rs.{item.entryFee} {item.hasUserJoined.toString()}</Text>
+        <Text>{item.entryFee}</Text>
       </View>
-      <View style={styles.cardInnerContent} >
+      {!item.hasStarted && <View style={styles.cardInnerContent} >
         <Text>Starts In</Text>
         <Text>
           <Timer targetDate={item.startDateTime?.seconds * 1000}></Timer>
         </Text>
 
 
-      </View>
+      </View>}
+      {item.hasStarted && !item.isOver && <View style={styles.cardInnerContent} >
+        <Text>Ends in</Text>
+        <Text>
+          <Timer targetDate={item.endDateTime?.seconds * 1000}></Timer>
+        </Text>
+
+
+      </View>}
+      {
+        prizePool[item.leagueId]?.rankingInfo &&
+        <View style={{ padding: 10}}>
+          <Text style={{ flex: 1, fontWeight: 'bold',fontSize:20, marginBottom:10,textAlign: 'center'  }}>Prize Pool</Text>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={{ flex: 1, fontWeight: 'bold',textAlign: 'center'  }}>Rank</Text>
+            <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center', }}>Prize</Text>
+          </View>
+          {prizePool[item.leagueId]?.rankingInfo?.map(item => {
+            return <View style={{ flexDirection: 'row', padding: 3 }}>
+              <Text style={{ flex: 1,textAlign: 'center' }}>{item.rank}</Text><Text style={{ flex: 1, textAlign: 'center', }}>{item.prize}</Text>
+            </View>
+          })}
+        </View>
+      }
+
+
       {!item.hasUserJoined &&
 
         <View style={{ marginTop: 10 }}>

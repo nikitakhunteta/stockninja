@@ -121,7 +121,6 @@ export default Portfolio = ({ navigation, route }) => {
             return;
         }
         try {
-            console.log('entryFee', league?.entryFee)
             userContext?.deductWalletAmount(league?.entryFee);
             //reduce free slots in league
             await firestore().collection('leagues').doc(league?.leagueId).update({

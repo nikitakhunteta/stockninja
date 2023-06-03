@@ -11,7 +11,7 @@ export const Theme = {
         backgroundColor: backColor,
         screenBackgroundColor: backColor,
         tertiary: '#526D82',
-        fill: '#D2E9E9'//#9DB2BF'
+        fill: '#FFFFFF'//#D2E9E9'//#9DB2BF'
     },
     dark: {
         primary: '#424242',

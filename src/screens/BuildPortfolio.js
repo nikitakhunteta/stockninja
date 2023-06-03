@@ -66,7 +66,6 @@ export default function BuildPortfolio({ navigation, route }) {
     }
     const OrdersRoute = () => (
         <View style={{ flex: 1, width: '100%' }}>
-            <Text style={styles.header}>Current Orders</Text>
             <FlatList
                 data={portfolioStocks}
                 renderItem={({ item }) => <Item item={item._data} />}
@@ -116,7 +115,7 @@ export default function BuildPortfolio({ navigation, route }) {
                 <Text style={[styles.content,
                 ]}>{item.name}</Text>
                 <Text style={[styles.content, {
-                }]}>{item.name}</Text>
+                }]}>{item.ticker}</Text>
             </View></View>
     }
 

@@ -37,9 +37,7 @@ const ShowCounter = ({ days, hours, minutes, seconds }) => {
 };
 const ExpiredNotice = () => {
     return (
-        <View>
-            <Text>League Ended!</Text>
-        </View>
+        null
     );
 };
 

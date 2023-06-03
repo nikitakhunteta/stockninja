@@ -50,6 +50,7 @@ const ExpandableComponent = ({ item, onClickFunction, HeaderComponent, ExpandedB
             <View
                 style={{
                     height: layoutHeight,
+                    
                     overflow: 'hidden',
                 }}>
                 <ExpandedBodyComponent item={item} />
