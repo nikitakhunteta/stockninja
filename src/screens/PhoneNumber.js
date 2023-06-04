@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Button, TextInput, Image } from 'react-native';
+import { Theme } from '../../theme';
 import images from './../assets'
 export default function PhoneNumber(props) {
   const [phoneNumber, setPhoneNumber] = useState(null);
@@ -16,8 +17,8 @@ export default function PhoneNumber(props) {
       <Text style={styles.subText}>Sign in with phone number</Text>
 
       <View style={{
-        flexDirection: 'row', borderWidth: 2,
-        borderColor: 'lightblue', marginVertical: 15, borderRadius: 8,
+        flexDirection: 'row', borderWidth: 1,
+        borderColor: Theme.light.borderColorDark, marginVertical: 15, borderRadius: 8,
       }}>
         <Text style={styles.inputText}>+91 | </Text>
         <TextInput
@@ -26,7 +27,7 @@ export default function PhoneNumber(props) {
           value={phoneNumber}
           onChangeText={setPhoneNumber}
         /></View>
-      <Button title="Sign In" onPress={() => props.onSubmit(phoneNumberValue)} />
+      <Button color={Theme.light.button}  title="Sign In" onPress={() => props.onSubmit(phoneNumberValue)} />
     </View>
   );
 }

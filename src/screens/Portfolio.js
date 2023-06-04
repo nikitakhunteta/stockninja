@@ -244,7 +244,7 @@ export default Portfolio = ({ navigation, route }) => {
                 </View>
             </View>
         </Modal>
-        {portfolios?.length > 0 &&  !addPortfolio && <View style={{ padding: 20 }}>
+        {portfolios?.length > 0 && !addPortfolio && <View style={{ padding: 20 }}>
             <CustomText bold style={{ marginTop: 10, fontSize: 20 }}>Select Portfolio to play</CustomText>
             <FlatList
                 data={portfolios}
@@ -253,7 +253,7 @@ export default Portfolio = ({ navigation, route }) => {
                 ListEmptyComponent={<CustomText style={{ fontSize: 18, margin: 10, marginTop: 100 }}>You have not created any portfolio yet! Let's get you started!!</CustomText>}
             />
         </View>}
-        {portfolios?.length > 0&&  !addPortfolio && <View style={styles.buttonContainer}>
+        {portfolios?.length > 0 && !addPortfolio && <View style={styles.buttonContainer}>
             <Button color={Theme.light.primary}
                 title='Join'
                 disabled={!checked}
@@ -324,8 +324,7 @@ const styles = StyleSheet.create({
         // backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
-        alignItems: 'center',
-
+        alignItems: 'center'
     },
     button: {
         borderRadius: 5,

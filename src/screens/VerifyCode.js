@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
-import CustomButton from '../components/CustomButton';
+import { Theme } from '../../theme';
 
 export default function OTP(props) {
   const [code, setCode] = useState('');
@@ -17,7 +17,7 @@ export default function OTP(props) {
         keyboardType="numeric"
         style={styles.input}
       />
-      <Button title="Confirm OTP" onPress={() => props.onSubmit(code)} />
+      <Button color={Theme.light.button} title="Confirm OTP" onPress={() => props.onSubmit(code)} />
     </View>
   );
 }
@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   input: {
-    borderWidth: 2,
-    borderColor: 'lightblue',
+    borderWidth: 1,
+    borderColor:  Theme.light.borderColorDark,
     width: 300,
     marginVertical: 15,
     fontSize: 20,

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import {
   StyleSheet, Text, View, Button, useColorScheme,
-  TouchableOpacity, ActivityIndicator
+  TouchableOpacity, ActivityIndicator, DrawerLayoutAndroid, Pressable, Image
 
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
 
 import firestore from '@react-native-firebase/firestore';
 import ExpandableCard from '../components/ExpandableCard';
@@ -12,15 +13,19 @@ import Timer from '../components/Timer';
 import { Theme } from '../../theme';
 import CustomText from '../components/CustomText';
 import PrizePool from '../components/PrizePool';
+import images from './../assets'
+import Context from '../Context/context';
 
 export default function Authenticated({ navigation, route }) {
   const { leagueId, portfolioId, uid } = route.params;
+  const drawer = useRef(null);
 
   const [leagues, setLeagues] = useState([]);
   const [prizePool, setPrizePool] = useState({});
   const colorTheme = useColorScheme();
   const theme = Theme[colorTheme];
   const [loading, setLoading] = useState(false);
+  const userContext = useContext(Context);
 
   const dateInPast = (firstDate, secondDate) => {
     if (firstDate <= secondDate.getTime()) {
@@ -273,7 +278,7 @@ export default function Authenticated({ navigation, route }) {
             <Text style={{ flex: 1, textAlign: 'center' }}>Prize</Text>
           </View>
           {prizePool[item.leagueId]?.rankingInfo?.map(item => {
-            return <PrizePool item={item} />
+            return <PrizePool item={item} key={item.rank} />
           })}
         </View>
       }
@@ -294,6 +299,55 @@ export default function Authenticated({ navigation, route }) {
       }
     </View>
   }
+  const navigationView = (props) => {
+    const closeDrawer = () => {
+      auth().signOut();
+      drawer.current.closeDrawer();
+    }
+    const redirectToAddMoney = (toWithdraw) => {
+      drawer.current.closeDrawer();
+      navigation.navigate('AddMoney', { toWithdraw })
+    }
+    return <View style={[styles.container, styles.navigationContainer]}>
+      <CustomText bold large style={{ marginVertical: 10 }}>Hello {auth().currentUser.phoneNumber}</CustomText>
+
+      <View style={{ flexDirection: 'row' }}>
+        <CustomText large style={{ marginVertical: 10 }}>Balance</CustomText>
+        <CustomText large bold style={{ marginVertical: 10, flex: 1, textAlign: 'right' }}>{userContext?.wallet?.amount}</CustomText>
+      </View>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Pressable
+          style={[styles.button, styles.buttonOpen]}
+          onPress={() => redirectToAddMoney(false)}>
+          <Text style={styles.textStyle}>Add Money</Text>
+        </Pressable>
+
+        <Pressable
+          style={[styles.button, styles.buttonOpen]}
+          onPress={() => redirectToAddMoney(true)}>
+          <Text style={styles.textStyle}>WithDraw Money</Text>
+        </Pressable>
+      </View>
+      <Button
+        color={Theme.light.button}
+        title="Signout"
+        onPress={() => closeDrawer()}
+      />
+    </View>
+  };
+  const AppHeader = (props) => {
+    return (
+      <View style={{ flexDirection: 'row' }}>
+        <Pressable onPress={() => {
+          drawer.current.openDrawer();
+        }}>
+          <Image source={images.menuIcon} style={{ height: 30, width: 30, margin: 4 }} />
+        </Pressable>
+
+      </View>
+    )
+  }
   if (loading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -303,25 +357,20 @@ export default function Authenticated({ navigation, route }) {
   }
 
   return (
-    <View style={styles.screen}>
-      <Text style={styles.text}>Leagues</Text>
-      {/* <Text style={styles.phoneNumber}>{auth().currentUser.displayName + ' ' + auth().currentUser.phoneNumber}</Text> */}
-      <ExpandableCard data={leagues}
-        HeaderComponent={HeaderComponent}
-        ExpandedBodyComponent={ExpandedBodyComponent}>
-      </ExpandableCard>
-      {/* <Button
-        title="Portfolio"
-        onPress={() =>
-          navigation.navigate('Portfolio')
-        }
-      />
-
-      <View style={{ marginTop: 30 }}>
-        <Button title="Signout" onPress={() => auth().signOut()} />
-      </View> */}
-
-    </View>
+    <DrawerLayoutAndroid
+      ref={drawer}
+      drawerWidth={300}
+      renderNavigationView={() => navigationView(uid)}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+        <AppHeader></AppHeader>
+        <Text style={[styles.text, { flex: 1, textAlign: 'center' }]}>Leagues</Text></View>
+      <View style={styles.screen}>
+        <ExpandableCard data={leagues} dataKeyExtractor='name'
+          HeaderComponent={HeaderComponent}
+          ExpandedBodyComponent={ExpandedBodyComponent}>
+        </ExpandableCard>
+      </View>
+    </DrawerLayoutAndroid>
   );
 }
 
@@ -364,7 +413,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   button: {
-    color: 'black',
+    color: Theme.light.button,
+    height: 30,
     backgroundColor: Theme.light.primary,
+    marginBottom: 10,
+  },
+  navigationContainer: {
+    marginTop: 5,
+    padding: 10,
+  }, container: {
+    flex: 1,
+    // alignItems: 'center',
+    // justifyContent: 'center',
+    padding: 16,
+  },
+  buttonOpen: {
+    padding: 5,
+    backgroundColor: Theme.light.primary,
+    paddingLeft: 8,
+    paddingRight: 8
+  },
+
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   }
 });
