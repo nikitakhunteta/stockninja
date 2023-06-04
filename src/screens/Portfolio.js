@@ -122,11 +122,12 @@ export default Portfolio = ({ navigation, route }) => {
             return;
         }
         try {
+            console.log('league',league)
             userContext?.deductWalletAmount(league?.entryFee);
             //reduce free slots in league
             await firestore().collection('leagues').doc(league?.leagueId).update({
                 freeSlots: league?.freeSlots - 1,
-                slotsFilled: league?.slotsFilled + 1
+                slotsFilled: Number(league?.slotsFilled) + 1
             }).then(() => {
             });
             const leagueJoinedDoc = await firestore().collection('leaguesJoined').add({

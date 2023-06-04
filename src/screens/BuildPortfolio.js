@@ -79,7 +79,7 @@ export default function BuildPortfolio({ navigation, route }) {
                 data={portfolioStocks}
                 renderItem={({ item }) => <Item item={item._data} />}
                 keyExtractor={item => item.id}
-                ListEmptyComponent={<Text>No orders yet!</Text>}
+                ListEmptyComponent={<CustomText medium style={{ margin: 10 }}>No orders yet!</CustomText>}
             />
         </View>
     );
@@ -213,7 +213,7 @@ export default function BuildPortfolio({ navigation, route }) {
             activeColor={'black'}
             inactiveColor={'black'}
             pressColor={'white'}
-            style={{ backgroundColor: 'white',fontWeight:'bold' }}
+            style={{ backgroundColor: 'white', fontWeight: 'bold' }}
         />
     );
 
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
     },
-    content:{
+    content: {
         fontSize: 16
     }
 });

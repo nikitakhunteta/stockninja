@@ -51,7 +51,9 @@ export default function Authenticated({ navigation, route }) {
   const getData = async () => {
     try {
       const leaguesData = await firestore().collection('leagues').get();
+      console.log('uid',uid)
       const leaguesJoined = await firestore().collection('leaguesJoined').where('userId', '==', uid).get();
+      console.log('leaguesJoined',leaguesJoined._docs.length)
       massageData(leaguesData, leaguesJoined);
     } catch (e) {
       console.log(e);
@@ -60,6 +62,8 @@ export default function Authenticated({ navigation, route }) {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      console.log('calling foe',uid)
+
       setLoading(true);
       try {
         async function getData() {
@@ -223,7 +227,8 @@ export default function Authenticated({ navigation, route }) {
         leagueId: item.leagueId,
         leagueJoinedId: item.leagueJoinedId,
         entryFee: item.entryFee,
-        freeSlots: item.freeSlots
+        freeSlots: item.freeSlots,
+        slotsFilled: item.slotsFilled
       },
       leagueId: item.leagueId,
       leagueJoinedId: item.leagueJoinedId
@@ -232,6 +237,7 @@ export default function Authenticated({ navigation, route }) {
     // select the portfolio to be used 
   }
   const viewContestPortfolio = (item) => {
+    console.log('sending', item)
     navigation.navigate('ViewContestPortfolio', { league: item })
   }
   const ExpandedBodyComponent = ({ item }) => {

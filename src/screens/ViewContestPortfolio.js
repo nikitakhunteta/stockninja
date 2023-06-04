@@ -23,9 +23,9 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
             async function getData() {
                 try {
                     const portfolioDoc = await firestore().collection('portfolios')
-                        .where('userId', '==', uid).where(firestore.FieldPath.documentId(), '==', league?.portfolioId)
+                        .doc(league?.portfolioId)
                         .get();
-                    setPortfolio(portfolioDoc?._docs?.[0]);
+                    setPortfolio(portfolioDoc);
                     if (league.isOver) {
                         const winnersInfo = await firestore().collection('winners')
                             .where('leagueId', '==', league?.leagueId)
