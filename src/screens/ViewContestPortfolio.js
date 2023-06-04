@@ -4,13 +4,9 @@ import { View, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity }
 import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
 import { Theme } from '../../theme';
+import CustomText from '../components/CustomText';
+import PrizePool from '../components/PrizePool';
 
-const dateInPast = (firstDate, secondDate = new Date()) => {
-    if (firstDate <= secondDate.getTime()) {
-        return true;
-    }
-    return false;
-};
 export default ViewContestPortfolio = ({ navigation, route }) => {
 
     const { uid, league } = route.params;
@@ -56,20 +52,20 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
                 <View style={{ flexDirection: 'row' }}>
-                    <Text>{item._data.rank}</Text></View>
+                    <CustomText>{item._data.rank}</CustomText></View>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text>{item._data.userId}</Text>
+                    <CustomText>{item._data.userId}</CustomText>
                 </View>
             </View>
         </View>
     );
     const PrizeItem = ({ item }) => (
-        <View style={[styles.cardStyle]}>
+        <View style={[styles.cardStyle, { borderWidth: 0.5 }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text>{item.rank}</Text></View>
+                    <CustomText>{item.rank}</CustomText></View>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text>{item.prize}</Text>
+                    <CustomText>{item.prize}</CustomText>
                 </View>
             </View>
         </View>
@@ -95,47 +91,53 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
     return <View style={[styles.screen]} >
         {league.isOver && <Text style={styles.headerText}>Portfolio {portfolio?._data.name} </Text>
         }
-        {!league?.isOver && <View><Text style={styles.subHeader}>Portfolio isOver{league?.isOver.toString()}</Text><TouchableOpacity
+        {!league?.isOver && <View><CustomText bold style={styles.subHeader}>Portfolio</CustomText><TouchableOpacity
             activeOpacity={1}
             onPress={() => getPortfolioDetails(portfolio?._data?.name, portfolio?._ref?._documentPath?._parts[1])}
         ><View
             style={[styles.portfolioContainer]}
             key={portfolio?._data.name}>
-                <Text style={styles.headerText}>{portfolio?._data.name} </Text>
+                <CustomText bold large style={styles.headerText}>{portfolio?._data.name} </CustomText>
                 <View style={[{
                     flexDirection: 'row',
                     TouchableOpacity,
                     justifyContent: 'space-between'
                 }]} >
-                    <Text>Coins Available</Text>
-                    <Text>{portfolio?._data?.coinsAvailable}</Text>
+                    <CustomText medium >Coins Available</CustomText>
+                    <CustomText medium bold>{portfolio?._data?.coinsAvailable}</CustomText>
                 </View>
             </View>
         </TouchableOpacity></View>}
         {league.isOver && <View style={{ marginTop: 10 }}>
             <View style={styles.portfolioContainer}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 15, padding: 5, fontWeight: 'normal' }}>Rank</Text>
-                    <Text style={{ fontSize: 20, padding: 5, fontWeight: 'bold' }}>{portfolioValue?.rank}</Text>
+                    <CustomText style={{ fontSize: 15, padding: 5, fontWeight: 'normal' }}>Rank</CustomText>
+                    <CustomText style={{ fontSize: 20, padding: 5, fontWeight: 'bold' }}>{portfolioValue?.rank}</CustomText>
 
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 15, padding: 5, fontWeight: 'normal' }}>Portfolio Value</Text>
-                    <Text style={{ fontSize: 20, padding: 5, fontWeight: 'bold' }}>{portfolioValue?.portfolioValue}</Text>
+                    <CustomText style={{ fontSize: 15, padding: 5, fontWeight: 'normal' }}>Portfolio Value</CustomText>
+                    <CustomText style={{ fontSize: 20, padding: 5, fontWeight: 'bold' }}>{portfolioValue?.portfolioValue}</CustomText>
                 </View>
             </View>
             {winnerInfo?.length > 0 && <View>
-                <Text style={[styles.subHeader, { marginTop: 15, marginBottom: 10 }]}>Winners</Text>
+                <CustomText style={[styles.subHeader, { marginTop: 15, marginBottom: 10 }]}>Winners</CustomText>
                 <FlatList data={winnerInfo}
                     keyExtractor={item => item._data.userId}
                     renderItem={({ item }) => <Item item={item} />}
                 /></View>}
         </View>}
-        {!league.hasStarted && league?.prizePoolMapping?.rankingInfo?.length > 0 && <View style={{ marginTop: 10 }}>
-            <Text style={[styles.subHeader]}>Prize Pool</Text>
-            <FlatList data={league?.prizePoolMapping?.rankingInfo} renderItem={({ item }) => <PrizeItem item={item} />}
-            />
-        </View>}
+        {!league.hasStarted && league?.prizePoolMapping?.rankingInfo?.length > 0 &&
+            <View style={{ marginTop: 10, width: '70%', alignSelf: 'center' }}>
+                <CustomText style={[styles.subHeader]}>Prize Pool</CustomText>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text style={{ flex: 1, textAlign: 'center' }}>Rank</Text>
+                    <Text style={{ flex: 1, textAlign: 'center' }}>Prize</Text>
+                </View>
+                {league?.prizePoolMapping?.rankingInfo?.map(item => {
+                    return <PrizePool item={item} key={item.rank} />
+                })}
+            </View>}
 
     </View>
 }
@@ -158,8 +160,8 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     headerText: {
-        fontSize: 20,
-        fontWeight: 'bold',
+        // fontSize: 20,
+        // fontWeight: 'bold',
     },
     subHeader: {
         fontSize: 20,
@@ -172,6 +174,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         margin: 10,
+        borderColor: Theme.light.borderColorDark
     }
 
 });
