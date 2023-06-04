@@ -1,4 +1,4 @@
-const backColor = '#DDE6ED';
+const backColor = '#FFFFFF';
 const frontColor = '#47A992';
 
 export const Theme = {

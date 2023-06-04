@@ -77,8 +77,13 @@ export default function BuildPortfolio({ navigation, route }) {
     useEffect(() => {
         setLoading(true);
         async function getStocksData() {
+            let randomNum = Math.floor(Math.random() * 1000)
             const topStocks = await firestore().collection('top-10-stocks').get();
-            let data = topStocks?._docs?.map(s => ({ ...s._data, id: s?._ref._documentPath._parts[1] }))
+            let data = topStocks?._docs?.map(s => ({
+                ...s._data,
+                id: s?._ref._documentPath._parts[1],
+                price: Math.floor(Math.random() * randomNum)
+            }));
             setMasterStocks(data);
             setError(null);
             setLoading(false);
@@ -156,11 +161,17 @@ export default function BuildPortfolio({ navigation, route }) {
     const searchFilterFunction = async (text) => {
         setFilterValue(text);
         if (text) {
-            const res = await fetch(`http://10.0.2.2:3000/instruments?filter=${text}`);
-            res
-                .json()
+            const res = await fetch(`https://us-central1-stockninja-da767.cloudfunctions.net/app/instruments?filter=${text}`);
+            res.json()
                 .then((res) => {
-                    setMasterStocks([...res]);
+                    let updatedData = res?.map(s => {
+                        let randomNum = Math.floor(Math.random() * 1000);
+                        return {
+                            ...s,
+                            price: Math.floor(Math.random() * randomNum)
+                        }
+                    })
+                    setMasterStocks(updatedData);
                 })
                 .catch((err) => console.log(err));
         } else {

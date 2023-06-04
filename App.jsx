@@ -6,7 +6,7 @@ import Portfolio from './src/screens/Portfolio';
 import BuildPortfolio from './src/screens/BuildPortfolio';
 import AddMoney from './src/screens/AddMoney';
 import PlaceOrder from './src/screens/PlaceOrder';
-import ContestParticipate from './src/screens/ViewContestPortfolio';
+import ViewContestPortfolio from './src/screens/ViewContestPortfolio';
 import Authenticated from './src/screens/Authenticated';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';

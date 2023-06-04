@@ -16,29 +16,40 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
     const { uid, league } = route.params;
     const [portfolio, setPortfolio] = useState();
     const [winnerInfo, setWinnerInfo] = useState();
+    const [portfolioValue, setPortfolioValue] = useState(null);
     const [loading, setLoading] = useState(false);
     const userContext = useContext(Context);
 
     useEffect(() => {
-        setLoading(true);
+        const unsubscribe = navigation.addListener('focus', () => {
+            setLoading(true);
 
-        async function getData() {
-            try {
-                const portfolioDoc = await firestore().collection('portfolios')
-                    .where('userId', '==', uid).where(firestore.FieldPath.documentId(), '==', league?.portfolioId)
-                    .get();
-                setPortfolio(portfolioDoc?._docs?.[0]);
-                const winnersInfo = await firestore().collection('winners')
-                    .where('leagueId', '==', league?.leagueId)
-                    .get();
-                setWinnerInfo(winnersInfo?._docs)
-            } catch (e) {
+            async function getData() {
+                try {
+                    const portfolioDoc = await firestore().collection('portfolios')
+                        .where('userId', '==', uid).where(firestore.FieldPath.documentId(), '==', league?.portfolioId)
+                        .get();
+                    setPortfolio(portfolioDoc?._docs?.[0]);
+                    if (league.isOver) {
+                        const winnersInfo = await firestore().collection('winners')
+                            .where('leagueId', '==', league?.leagueId)
+                            .get();
+                        setWinnerInfo(winnersInfo?._docs);
 
+                        const leagueJoined = await firestore().collection('leaguesJoined')
+                            .doc(league.leagueJoinedId)
+                            .get();
+                        setPortfolioValue(leagueJoined?._data);
+                    }
+                } catch (e) {
+
+                }
+                setLoading(false)
             }
-            setLoading(false)
-        }
-        getData();
-    }, [league?.portfolioId]);
+            getData();
+        });
+        return unsubscribe;
+    }, [navigation]);
 
     const Item = ({ item }) => (
         <View style={[styles.cardStyle]}>
@@ -48,6 +59,17 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
                     <Text>{item._data.rank}</Text></View>
                 <View style={{ flexDirection: 'row' }}>
                     <Text>{item._data.userId}</Text>
+                </View>
+            </View>
+        </View>
+    );
+    const PrizeItem = ({ item }) => (
+        <View style={[styles.cardStyle]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text>{item.rank}</Text></View>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text>{item.prize}</Text>
                 </View>
             </View>
         </View>
@@ -70,8 +92,10 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
             </View>
         );
     }
-    return <View style={[styles.screen]} ><Text style={styles.subHeader}>Portfolio</Text>
-        <TouchableOpacity
+    return <View style={[styles.screen]} >
+        {league.isOver && <Text style={styles.headerText}>Portfolio {portfolio?._data.name} </Text>
+        }
+        {!league?.isOver && <View><Text style={styles.subHeader}>Portfolio isOver{league?.isOver.toString()}</Text><TouchableOpacity
             activeOpacity={1}
             onPress={() => getPortfolioDetails(portfolio?._data?.name, portfolio?._ref?._documentPath?._parts[1])}
         ><View
@@ -87,17 +111,32 @@ export default ViewContestPortfolio = ({ navigation, route }) => {
                     <Text>{portfolio?._data?.coinsAvailable}</Text>
                 </View>
             </View>
-        </TouchableOpacity>
-        {dateInPast(league.endDateTime * 1000) && <View style={{ marginTop: 10 }}>
-            <Text style={[styles.subHeader]}>Winners</Text>
-            <FlatList data={winnerInfo} renderItem={({ item }) => <Item item={item} />}
+        </TouchableOpacity></View>}
+        {league.isOver && <View style={{ marginTop: 10 }}>
+            <View style={styles.portfolioContainer}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 15, padding: 5, fontWeight: 'normal' }}>Rank</Text>
+                    <Text style={{ fontSize: 20, padding: 5, fontWeight: 'bold' }}>{portfolioValue?.rank}</Text>
+
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 15, padding: 5, fontWeight: 'normal' }}>Portfolio Value</Text>
+                    <Text style={{ fontSize: 20, padding: 5, fontWeight: 'bold' }}>{portfolioValue?.portfolioValue}</Text>
+                </View>
+            </View>
+            {winnerInfo?.length > 0 && <View>
+                <Text style={[styles.subHeader, { marginTop: 15, marginBottom: 10 }]}>Winners</Text>
+                <FlatList data={winnerInfo}
+                    keyExtractor={item => item._data.userId}
+                    renderItem={({ item }) => <Item item={item} />}
+                /></View>}
+        </View>}
+        {!league.hasStarted && league?.prizePoolMapping?.rankingInfo?.length > 0 && <View style={{ marginTop: 10 }}>
+            <Text style={[styles.subHeader]}>Prize Pool</Text>
+            <FlatList data={league?.prizePoolMapping?.rankingInfo} renderItem={({ item }) => <PrizeItem item={item} />}
             />
         </View>}
-       <View style={{ marginTop: 10 }}>
-            <Text style={[styles.subHeader]}>Prize Pool</Text>
-            <FlatList data={winnerInfo} renderItem={({ item }) => <Item item={item} />}
-            />
-        </View>
+
     </View>
 }
 
@@ -119,7 +158,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     headerText: {
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: 'bold',
     },
     subHeader: {
@@ -131,8 +170,6 @@ const styles = StyleSheet.create({
     cardStyle: {
         backgroundColor: "white",
         borderRadius: 10,
-        // width: Dimensions.get("window").width / 2.6,
-        // height: Dimensions.get("window").width / 2.6,
         padding: 10,
         margin: 10,
     }

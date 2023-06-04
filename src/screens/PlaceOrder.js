@@ -27,7 +27,8 @@ export default PlaceOrder = ({ route, navigation }) => {
                 quantity,
                 userId: uid,
                 portfolioId: route.params?.portfolio?.portfolioId,
-                leagueJoinedId: leagueJoinedId ?? null
+                leagueJoinedId: leagueJoinedId ?? null,
+                name
             });
 
             userContext?.updateSelectedPortfolioData({

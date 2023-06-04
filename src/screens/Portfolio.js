@@ -124,7 +124,8 @@ export default Portfolio = ({ navigation, route }) => {
             userContext?.deductWalletAmount(league?.entryFee);
             //reduce free slots in league
             await firestore().collection('leagues').doc(league?.leagueId).update({
-                freeSlots: league?.freeSlots - 1
+                freeSlots: league?.freeSlots - 1,
+                slotsFilled: league?.slotsFilled + 1
             }).then(() => {
             });
             const leagueJoinedDoc = await firestore().collection('leaguesJoined').add({
@@ -167,7 +168,7 @@ export default Portfolio = ({ navigation, route }) => {
                     borderStyle: 'solid'
                 }}
                 key={item._data.name}>
-                    <Pressable style={{marginLeft: 10}}
+                    <Pressable style={{ marginLeft: 10 }}
                         onPress={() => {
                             let id = item?._ref?._documentPath?._parts[1]
                             setChecked(id);

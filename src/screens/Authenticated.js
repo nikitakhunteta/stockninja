@@ -73,6 +73,91 @@ export default function Authenticated({ navigation, route }) {
     return unsubscribe;
   }, [navigation]);
 
+  useEffect(() => {
+    async function calculate(obj) {
+      console.log('starting')
+      let leagueId = obj.leagueId
+      const leagueDoc = await firestore().collection('leagues').doc(leagueId).get();
+      let league = leagueDoc.data();
+      const leagueJoinedIdsDoc = await firestore().collection('leaguesJoined')
+        .where("leagueId", "==", leagueId)
+        .get();
+      let portfolioToBeFreed = []
+      let ranking = [];
+      let leagueJoinedIds = leagueJoinedIdsDoc._docs;
+      async function processLeagueData() {
+        for (const l of leagueJoinedIds) {
+          let lj = { ...l?._data, id: l._ref._documentPath._parts[1] }
+          portfolioToBeFreed.push(lj.portfolioId)
+          let portfolioValue = 0;
+          let oldPortfolioValue = 0;
+          //generate stock price random
+          //update lj with last portfolio value
+          const ordersDoc = await firestore().collection('orders').where('leagueJoinedId', '==', lj.id).get();
+          ordersDoc.forEach((order) => {
+            let data = order.data();
+            let oldPrice = data.price;
+            let qty = Number(data.quantity);
+            let newPrice = Math.floor(Math.random() * oldPrice * 2);
+            console.log('newPrice', newPrice, oldPrice, qty)
+            let value = qty * newPrice;
+            portfolioValue += value;
+            oldPortfolioValue += qty * oldPrice;
+          });
+          let delta = (portfolioValue - oldPortfolioValue) / oldPortfolioValue;
+          ranking.push({
+            portfolioValue: portfolioValue,
+            oldPortfolioValue,
+            leagueJoinedId: lj.id,
+            userId: lj.userId,
+            delta
+          });
+        }
+      }
+      await processLeagueData();
+      ranking.sort((a, b) => b.delta - a.delta);
+      async function processUserRank() {
+        for (const index in ranking) {
+          let rank = ranking[index];
+          await firestore().collection('leaguesJoined').doc(rank.leagueJoinedId)
+            .update({
+              portfolioValue: rank.portfolioValue,
+              oldPortfolioValue: rank.oldPortfolioValue,
+              rank: Number(index) + 1,
+              delta: rank.delta
+            });
+          let totalPrizePool = league.entryFee * league.slotsFilled * 0.7;
+          let prize = league?.prizeInfo[Number(index) + 1] * totalPrizePool / 100;
+          await firestore().collection('winners').add({
+            userId: rank.userId,
+            leagueId,
+            prize,
+            rank: Number(index) + 1
+          });
+        }
+      }
+      await processUserRank();
+
+      async function processPortfolios() {
+        for (const portfolio of portfolioToBeFreed) {
+          console.log('portfolio', portfolio)
+          await firestore().collection('portfolios').doc(portfolio)
+            .update({
+              coinsAvailable: 100000,
+              isAvailable: true,
+              stocksAllowed: 30
+            });
+        }
+      }
+      await processPortfolios();
+
+
+    }
+    // calculate({
+    //   leagueId: 'C4qs5iArqKksfAvStuCv'
+    // });
+  }, [])
+
   const massageData = (leaguesData, leaguesJoined) => {
     let currentDate = new Date();
 
@@ -105,15 +190,21 @@ export default function Authenticated({ navigation, route }) {
         ]
 
       }
+      let hasStarted = dateInPast(v?._data?.startDateTime?.seconds * 1000, currentDate)
+      let isEndDateOver = dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate);
+      let isOngoing = !isEndDateOver && hasStarted;
+
       return ({
         ...v._data,
-        isOver: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
-        isOngoing: dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate),
-        hasStarted: dateInPast(v?._data?.startDateTime?.seconds * 1000, currentDate),
+        isOver: isEndDateOver,
+        isOngoing: isOngoing,
+        hasStarted,
+        inFuture: !hasStarted,
         leagueId,
         hasUserJoined: leaguesJoinedIds?.includes(leagueId),
         leagueJoinedId: leagueDocMapping[leagueId]?.leagueJoinedId,
         portfolioId: leagueDocMapping[leagueId]?.portfolioId,
+        prizePoolMapping: prizePoolMapping[leagueId]
       })
     });
     setLeagues(data);
@@ -182,15 +273,15 @@ export default function Authenticated({ navigation, route }) {
       </View>}
       {
         prizePool[item.leagueId]?.rankingInfo &&
-        <View style={{ padding: 10}}>
-          <Text style={{ flex: 1, fontWeight: 'bold',fontSize:20, marginBottom:10,textAlign: 'center'  }}>Prize Pool</Text>
+        <View style={{ padding: 10 }}>
+          <Text style={{ flex: 1, fontWeight: 'bold', fontSize: 20, marginBottom: 10, textAlign: 'center' }}>Prize Pool</Text>
           <View style={{ flexDirection: 'row' }}>
-            <Text style={{ flex: 1, fontWeight: 'bold',textAlign: 'center'  }}>Rank</Text>
+            <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center' }}>Rank</Text>
             <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center', }}>Prize</Text>
           </View>
           {prizePool[item.leagueId]?.rankingInfo?.map(item => {
             return <View style={{ flexDirection: 'row', padding: 3 }}>
-              <Text style={{ flex: 1,textAlign: 'center' }}>{item.rank}</Text><Text style={{ flex: 1, textAlign: 'center', }}>{item.prize}</Text>
+              <Text style={{ flex: 1, textAlign: 'center' }}>{item.rank}</Text><Text style={{ flex: 1, textAlign: 'center', }}>{item.prize}</Text>
             </View>
           })}
         </View>
@@ -200,7 +291,8 @@ export default function Authenticated({ navigation, route }) {
       {!item.hasUserJoined &&
 
         <View style={{ marginTop: 10 }}>
-          <Button color={Theme.light.button} title="Participate" disabled={item.hasStarted || item.freeSlots === 0}
+          <Button color={Theme.light.button} title="Participate"
+            disabled={item.hasStarted || item.freeSlots === 0}
             onPress={() => participateInContest(item)} />
         </View>
       }
