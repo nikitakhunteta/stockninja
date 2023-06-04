@@ -1,5 +1,12 @@
 const backColor = '#FFFFFF';
-const frontColor = '#47A992';
+const frontColor = '#00216C';
+// $white: #FBFBFCff;
+// $celestial-blue: #0790DCff;
+// $alice-blue: #D7E4EAff;
+// $paynes-gray: #2C6886ff;
+// $cadet-gray: #8DA5B6ff;
+// #00216C
+// #0790DC
 
 export const Theme = {
     light: {
@@ -7,10 +14,11 @@ export const Theme = {
         primary: frontColor,
         color:'black',
         secondary: frontColor,
-        borderColorDark: frontColor,
+        borderColorDark: '#A9A9A9',
         backgroundColor: backColor,
         screenBackgroundColor: backColor,
         tertiary: '#526D82',
+        text:'black',
         fill: '#FFFFFF'//#D2E9E9'//#9DB2BF'
     },
     dark: {

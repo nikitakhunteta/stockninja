@@ -12,6 +12,7 @@ import Context from '../Context/context';
 import { TOTAL_PORTFOLIO_ALLOWED, COINS_IN_EACH_LEAGUE } from '../../constants';
 import { CheckBox } from 'react-native-elements';
 import { Theme } from '../../theme';
+import CustomText from '../components/CustomText';
 
 export default Portfolio = ({ navigation, route }) => {
 
@@ -159,14 +160,14 @@ export default Portfolio = ({ navigation, route }) => {
                 activeOpacity={1}
                 onPress={() => getPortfolioDetails(item?._data?.name, item?._ref?._documentPath?._parts[1])}
             ><View
-                style={{
-                    marginBottom: 10,
+                style={[{
+                    // margin: 10,
                     flexDirection: 'row',
-                    borderColor: Theme.light.primary,
-                    borderBottomWidth: 1,
+                    // borderColor: Theme.light.borderColorDark,
+                    borderWidth: 1,
                     alignItems: 'center',
-                    borderStyle: 'solid'
-                }}
+                    // borderStyle: 'solid'
+                }, styles.cardStyle]}
                 key={item._data.name}>
                     <Pressable style={{ marginLeft: 10 }}
                         onPress={() => {
@@ -229,7 +230,7 @@ export default Portfolio = ({ navigation, route }) => {
                     <Text style={styles.modalText}>Insufficient balance!! Please add money to proceed.</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <Pressable
-                            style={[styles.button, styles.buttonClose]}
+                            style={[styles.button, styles.buttonOpen]}
                             onPress={() => redirectToAddMoney()}>
                             <Text style={styles.textStyle}>Add Money</Text>
                         </Pressable>
@@ -243,14 +244,16 @@ export default Portfolio = ({ navigation, route }) => {
                 </View>
             </View>
         </Modal>
-        <Text>{userContext?.wallet.amount}</Text>
-        <FlatList
-            data={portfolios}
-            renderItem={({ item }) => <Item item={item} />}
-            keyExtractor={item => item.id}
-            ListEmptyComponent={<Text style={{ fontSize: 18, margin: 10 }}>You have not created any portfolio yet! Let's get you started!!</Text>}
-        />
-        {portfolios?.length > 0 && <View style={styles.buttonContainer}>
+        {portfolios?.length > 0 &&  !addPortfolio && <View style={{ padding: 20 }}>
+            <CustomText bold style={{ marginTop: 10, fontSize: 20 }}>Select Portfolio to play</CustomText>
+            <FlatList
+                data={portfolios}
+                renderItem={({ item }) => <Item item={item} />}
+                keyExtractor={item => item.id}
+                ListEmptyComponent={<CustomText style={{ fontSize: 18, margin: 10, marginTop: 100 }}>You have not created any portfolio yet! Let's get you started!!</CustomText>}
+            />
+        </View>}
+        {portfolios?.length > 0&&  !addPortfolio && <View style={styles.buttonContainer}>
             <Button color={Theme.light.primary}
                 title='Join'
                 disabled={!checked}
@@ -268,7 +271,7 @@ export default Portfolio = ({ navigation, route }) => {
             <View style={{ flexDirection: 'row', margin: 25, marginTop: 5, justifyContent: 'center' }}>
 
                 <Pressable
-                    style={[styles.button, styles.buttonClose, { flex: 1 }]}
+                    style={[styles.button, styles.buttonOpen, { flex: 1 }]}
                     onPress={savePortfolio}>
                     <Text style={styles.textStyle}>Save</Text>
                 </Pressable>
@@ -333,7 +336,7 @@ const styles = StyleSheet.create({
         backgroundColor: Theme.light.primary,
     },
     buttonClose: {
-        backgroundColor: Theme.light.primary,
+        backgroundColor: Theme.light.tertiary,
     },
     textStyle: {
         color: 'white',
@@ -345,4 +348,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 15
     },
+    cardStyle: {
+        backgroundColor: "white",
+        borderRadius: 10,
+        padding: 10,
+        margin: 10,
+        borderColor: Theme.light.borderColorDark
+    }
 });

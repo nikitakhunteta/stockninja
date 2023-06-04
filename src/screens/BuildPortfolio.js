@@ -10,6 +10,7 @@ import firestore from '@react-native-firebase/firestore';
 import Context from '../Context/context';
 import { Theme } from '../../theme';
 import ExpandableCard from '../components/ExpandableCard';
+import CustomText from '../components/CustomText';
 
 
 export default function BuildPortfolio({ navigation, route }) {
@@ -44,8 +45,16 @@ export default function BuildPortfolio({ navigation, route }) {
             <View style={{ flex: 1, width: '100%', }}>
 
                 <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: 16 }}>Coins: {userContext?.selectedPortfolio?.coinsAvailable}</Text>
-                    <Text style={{ fontSize: 16 }}> {portfolioStocks.length ? 30 - distinctStocks : 30} stocks remaining out of {30}</Text>
+                    <View style={{ flexDirection: 'row' }}>
+                        <CustomText style={{ fontSize: 16 }} > Coins: </CustomText>
+                        <CustomText bold style={{ fontSize: 16 }}> {userContext?.selectedPortfolio?.coinsAvailable}</CustomText>
+                    </View>
+                    <View style={{ flexDirection: 'row', }}>
+                        <CustomText bold style={{ fontSize: 16 }}> {portfolioStocks.length ? 30 - distinctStocks : 30} </CustomText>
+                        <CustomText style={{ fontSize: 16 }}>stocks remaining out of</CustomText>
+                        <CustomText style={{ fontSize: 16 }}> {30}</CustomText>
+
+                    </View>
                 </View>
                 <SearchBar
                     placeholder="Search Stock..."
@@ -117,27 +126,27 @@ export default function BuildPortfolio({ navigation, route }) {
                 flexDirection: 'column',
                 TouchableOpacity
             }]} >
-                <Text style={[styles.content,
-                ]}>{item.name}</Text>
-                <Text style={[styles.content, {
-                }]}>{item.ticker}</Text>
+                <CustomText style={[styles.content,
+                ]}>{item.name}</CustomText>
+                <CustomText style={[styles.content, {
+                }]}>{item.ticker}</CustomText>
             </View></View>
     }
 
     const ExpandedBodyComponent = ({ item }) => {
         return (<View style={[{
             flexDirection: 'column',
-            backgroundColor: '#C4DFDF',
+            // backgroundColor: '#C4DFDF',
             borderStyle: 'solid',
             borderTopWidth: 0.5,
             borderColor: Theme.light.primary,
 
         }]} >
             <View style={[{ flexDirection: 'row', padding: 10, justifyContent: 'space-between' }]} >
-                <Text>Price</Text>
-                <Text style={[{
+                <CustomText>Price</CustomText>
+                <CustomText style={[{
 
-                }]}>{item.price}</Text>
+                }]}>{item.price}</CustomText>
             </View>
 
             <Button
@@ -180,15 +189,15 @@ export default function BuildPortfolio({ navigation, route }) {
     };
     const Item = ({ item }) => (
         <View style={[styles.item]}>
-            <Text style={styles.content}>{item.ticker} </Text>
+            <CustomText style={styles.content}>{item.ticker} </CustomText>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text>Quantity: </Text>
-                    <Text>{item.quantity}</Text>
+                    <CustomText>Quantity: </CustomText>
+                    <CustomText bold>{item.quantity}</CustomText>
                 </View>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text>Price: </Text>
-                    <Text>{item.price}</Text></View>
+                    <CustomText>Price: </CustomText>
+                    <CustomText bold>{item.price}</CustomText></View>
             </View>
         </View>
     );
@@ -204,7 +213,7 @@ export default function BuildPortfolio({ navigation, route }) {
             activeColor={'black'}
             inactiveColor={'black'}
             pressColor={'white'}
-            style={{ backgroundColor: 'white' }}
+            style={{ backgroundColor: 'white',fontWeight:'bold' }}
         />
     );
 
@@ -246,4 +255,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
     },
+    content:{
+        fontSize: 16
+    }
 });

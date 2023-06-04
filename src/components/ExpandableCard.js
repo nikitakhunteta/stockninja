@@ -30,15 +30,16 @@ const ExpandableComponent = ({ item, onClickFunction, HeaderComponent, ExpandedB
 
         <View style={{
             margin: 10,
-            borderRadius: 15,
+            borderRadius: 5,
             borderStyle: 'solid',
-            //  borderWidth: 1,
-            // borderColor: theme.borderColorDark,
-            shadowColor: theme.tertiary,
-            shadowOffset: { width: -2, height: 4 },
-            shadowOpacity: 0.2,
-            shadowRadius: 3,
-            elevation: 10,
+             borderWidth: 1,
+            borderColor: theme.borderColorDark,
+            overflow:'hidden'
+            // shadowColor: theme.tertiary,
+            // shadowOffset: { width: -2, height: 4 },
+            // shadowOpacity: 0.2,
+            // shadowRadius: 3,
+            // elevation: 10,
         }}>
             {/*Header of the Expandable List Item*/}
             <TouchableOpacity
@@ -50,7 +51,6 @@ const ExpandableComponent = ({ item, onClickFunction, HeaderComponent, ExpandedB
             <View
                 style={{
                     height: layoutHeight,
-                    
                     overflow: 'hidden',
                 }}>
                 <ExpandedBodyComponent item={item} />
@@ -98,7 +98,9 @@ const ExpandableCard = ({ data, HeaderComponent, ExpandedBodyComponent, dataKeyE
         setListDataSource(array);
     };
     return (
-        <SafeAreaView style={{ width: '98%', flex: 1 }}>
+        <SafeAreaView style={{ 
+            width: '98%',
+             flex: 1}}>
             <View style={styles(theme).container}>
                 <ScrollView>
                     {listDataSource?.map((item, key) => {

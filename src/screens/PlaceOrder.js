@@ -3,6 +3,7 @@ import { View, Text, Button, TextInput, useColorScheme, StyleSheet, Alert } from
 import firestore from '@react-native-firebase/firestore';
 import { Theme } from '../../theme';
 import Context from '../Context/context';
+import CustomText from '../components/CustomText';
 
 
 export default PlaceOrder = ({ route, navigation }) => {
@@ -67,21 +68,21 @@ export default PlaceOrder = ({ route, navigation }) => {
             flexDirection: 'column',
             padding: 10,
         }]} >
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={[styles.contentHeading]}>Remaining Coins: </Text>
-                <Text style={[styles.content]}> {currentPortfolio} </Text>
+            <View style={{ flexDirection: 'row', alignItems:'center', marginBottom: 8 }}>
+                <CustomText style={[styles.contentHeading]}>Remaining Coins: </CustomText>
+                <CustomText bold style={[styles.content]}>{currentPortfolio} </CustomText>
             </View>
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={[styles.contentHeading]}>Stock: </Text>
-                <Text style={[styles.content]}>{name}</Text>
+            <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                <CustomText style={[styles.contentHeading]}>Stock: </CustomText>
+                <CustomText bold style={[styles.content]}>{name}</CustomText>
             </View>
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={[styles.contentHeading]}>Price:</Text>
-                <Text style={[styles.content]}> {price} </Text>
+            <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                <CustomText style={[styles.contentHeading]}>Price:</CustomText>
+                <CustomText bold style={[styles.content]}> {price} </CustomText>
             </View>
             {/* <View style={{ flexDirection: 'row' }}>
-                <Text style={[styles.content]}>Quantity:</Text>
-                <Text style={[styles.content]}> {quantity} </Text>
+                <CustomText style={[styles.content]}>Quantity:</CustomText>
+                <CustomText style={[styles.content]}> {quantity} </CustomText>
             </View> */}
             <TextInput
                 style={styles.input}
@@ -94,7 +95,7 @@ export default PlaceOrder = ({ route, navigation }) => {
             {quantityError.length > 0 &&
                 <Text style={{ color: 'red', paddingLeft: 12, paddingBottom: 10 }}>{quantityError}</Text>
             }
-            <Button 
+            <Button
                 color={Theme.light.primary}
                 disabled={quantityError.length > 0 || quantity == 0}
                 onPress={placeOrder}
@@ -116,11 +117,12 @@ const styles = StyleSheet.create({
         borderColor: Theme.light.borderColorDark
     },
     content: {
-        fontSize: 16
+        fontSize: 16,
+        justifyContent:'center',
     },
     contentHeading: {
-        fontWeight: 'bold',
-        fontSize: 18
+        // fontWeight: 'bold',
+        fontSize: 16
 
     }
 

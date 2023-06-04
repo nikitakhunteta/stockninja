@@ -7,6 +7,7 @@ import {
 import { } from 'react-native-gesture-handler';
 import Context from '../Context/context';
 import { Theme } from '../../theme';
+import CustomText from '../components/CustomText';
 
 export default AddMoney = ({ navigation }) => {
     const [amount, onChangeAmount] = useState();
@@ -17,8 +18,8 @@ export default AddMoney = ({ navigation }) => {
         navigation.goBack();
     }
     return <View style={{ padding: 10 }}>
-        <Text style={{ fontSize: 16 }}>Please add money to wallet</Text>
-        <Text style={{ fontSize: 16 }}>Amount available in wallet: {userContext?.wallet.amount}</Text>
+        <CustomText style={{ fontSize: 16 }}>Please add money to wallet</CustomText>
+        <CustomText style={{ fontSize: 16 }}>Amount available in wallet: {userContext?.wallet.amount}</CustomText>
         <View style={{ flexDirection: 'row', marginBottom: 5, marginTop: 5 }}>
             <Pressable
                 style={[styles.button, styles.buttonClose]}

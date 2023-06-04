@@ -6,12 +6,12 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
-import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import ExpandableCard from '../components/ExpandableCard';
 import Timer from '../components/Timer';
-import Portfolio from './Portfolio';
 import { Theme } from '../../theme';
+import CustomText from '../components/CustomText';
+import PrizePool from '../components/PrizePool';
 
 export default function Authenticated({ navigation, route }) {
   const { leagueId, portfolioId, uid } = route.params;
@@ -174,21 +174,11 @@ export default function Authenticated({ navigation, route }) {
     let data = leaguesData?._docs.map(v => {
       let leagueId = v._ref._documentPath._parts[1];
       prizePoolMapping[leagueId] = {
-        rankingInfo: [
-          {
-            rank: 1, prize: 500
-          },
-          {
-            rank: 2, prize: 400
-          }, {
-            rank: 3, prize: 300
-          }, {
-            rank: 4, prize: 200
-          }, {
-            rank: 5, prize: 100
-          },
-        ]
-
+        rankingInfo: []
+      };
+      let prizeInfo = v?._data.prizeInfo
+      for (let pi in prizeInfo) {
+        prizePoolMapping[leagueId].rankingInfo.push({ rank: pi, prize: prizeInfo[pi] })
       }
       let hasStarted = dateInPast(v?._data?.startDateTime?.seconds * 1000, currentDate)
       let isEndDateOver = dateInPast(v?._data?.endDateTime?.seconds * 1000, currentDate);
@@ -213,16 +203,13 @@ export default function Authenticated({ navigation, route }) {
 
   const HeaderComponent = ({ item }) => {
     return <View>
-      <Text style={styles.headerText}>{item.name}</Text>
+      <CustomText style={styles.headerText}>{item.name}</CustomText>
       <View style={[{
         flexDirection: 'row', TouchableOpacity,
         justifyContent: 'space-between'
       }]} >
-        <Text style={[styles.content,
-        {
-        }]}>Free Slots/Total</Text>
-        <Text style={[styles.content, {
-        }]}>{item.freeSlots}/{item.totalSlots} </Text>
+        <CustomText >Free Slots/Total</CustomText>
+        <CustomText bold>{item.freeSlots}/{item.totalSlots} </CustomText>
       </View></View>
   }
   const participateInContest = (item) => {
@@ -249,22 +236,23 @@ export default function Authenticated({ navigation, route }) {
       borderStyle: 'solid',
       borderColor: theme?.primary,
       borderTopWidth: 1,
-      backgroundColor: '#C4DFDF'
+      padding: 10
+      // backgroundColor: '#C4DFDF'
     }]} >
       <View style={styles.cardInnerContent} >
-        <Text>Entry Fee</Text>
-        <Text>{item.entryFee}</Text>
+        <CustomText >Entry Fee</CustomText>
+        <CustomText bold>{item.entryFee}</CustomText>
       </View>
       {!item.hasStarted && <View style={styles.cardInnerContent} >
-        <Text>Starts In</Text>
-        <Text>
+        <CustomText>Starts In</CustomText>
+        <CustomText>
           <Timer targetDate={item.startDateTime?.seconds * 1000}></Timer>
-        </Text>
+        </CustomText>
 
 
       </View>}
       {item.hasStarted && !item.isOver && <View style={styles.cardInnerContent} >
-        <Text>Ends in</Text>
+        <CustomText>Ends in</CustomText>
         <Text>
           <Timer targetDate={item.endDateTime?.seconds * 1000}></Timer>
         </Text>
@@ -273,16 +261,19 @@ export default function Authenticated({ navigation, route }) {
       </View>}
       {
         prizePool[item.leagueId]?.rankingInfo &&
-        <View style={{ padding: 10 }}>
-          <Text style={{ flex: 1, fontWeight: 'bold', fontSize: 20, marginBottom: 10, textAlign: 'center' }}>Prize Pool</Text>
+        <View style={{
+          padding: 10, width: '70%', alignSelf: 'center',
+        }}>
+          <CustomText bold style={{
+            flex: 1,
+            fontSize: 20, marginBottom: 10, textAlign: 'center'
+          }}>Rewards</CustomText>
           <View style={{ flexDirection: 'row' }}>
-            <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center' }}>Rank</Text>
-            <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center', }}>Prize</Text>
+            <Text style={{ flex: 1, textAlign: 'center' }}>Rank</Text>
+            <Text style={{ flex: 1, textAlign: 'center' }}>Prize</Text>
           </View>
           {prizePool[item.leagueId]?.rankingInfo?.map(item => {
-            return <View style={{ flexDirection: 'row', padding: 3 }}>
-              <Text style={{ flex: 1, textAlign: 'center' }}>{item.rank}</Text><Text style={{ flex: 1, textAlign: 'center', }}>{item.prize}</Text>
-            </View>
+            return <PrizePool item={item} />
           })}
         </View>
       }
@@ -319,7 +310,7 @@ export default function Authenticated({ navigation, route }) {
         HeaderComponent={HeaderComponent}
         ExpandedBodyComponent={ExpandedBodyComponent}>
       </ExpandableCard>
-      <Button
+      {/* <Button
         title="Portfolio"
         onPress={() =>
           navigation.navigate('Portfolio')
@@ -328,7 +319,7 @@ export default function Authenticated({ navigation, route }) {
 
       <View style={{ marginTop: 30 }}>
         <Button title="Signout" onPress={() => auth().signOut()} />
-      </View>
+      </View> */}
 
     </View>
   );
@@ -362,7 +353,9 @@ const styles = StyleSheet.create({
   },
   cardInnerContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between', paddingLeft: 10, paddingTop: 10, paddingRight: 10
+    justifyContent: 'space-between',
+    // paddingLeft: 10,
+    paddingTop: 10, paddingRight: 10
   }
   ,
   headerText: {
